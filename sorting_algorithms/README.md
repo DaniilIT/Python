@@ -27,7 +27,7 @@ def bubble_sort(array):
 
 ```
 
-<img src="images/bubble_sort.gif" alt="bubble_sort" title="Bubble sort" />
+<img src="images/bubble_sort.gif" alt="bubble_sort" title="Bubble sort" style="width: 280px;" />
 
 **Шейкерная сортировка cocktail_sort** отличается от пузырьковой тем, что она двунаправленная: перемещается слева направо, затем справа налево.
 
@@ -54,7 +54,7 @@ def selection_sort(array):
 
 ```
 
-<img src="images/selection_sort.gif" alt="selection_sort" title="Selection sort" />
+<img src="images/selection_sort.gif" alt="selection_sort" title="Selection sort" style="width: 280px;" />
 
 
 ## Сортировка вставками
@@ -75,7 +75,7 @@ def insertion_sort(array):
 
 ```
 
-<img src="images/insertion_sort.gif" alt="insertion_sort" title="Insertion sort" />
+<img src="images/insertion_sort.gif" alt="insertion_sort" title="Insertion sort" style="width: 280px;" />
 
 
 **Количество сравнений в массиве при n = 100**
