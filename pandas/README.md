@@ -49,6 +49,9 @@ data.iloc[[0, 2]] # data[[0, 2]]
 
 ```Python
 df = pd.DataFrame({'month': data, 'col1': np.arange(3), 'col2': [9, 8, 7]}, index=['Dec', 'Jan', 'Feb'])
+
+df = pd.DataFrame([['December', 0 , 9], ['January', 1 , 8], ['February', 2 , 7]],
+                  columns=['month', 'col1', 'col2'], index=['Dec', 'Jan', 'Feb'])
 ```
 ||**month**|**col1**|**col2**|
 |:-:|:-:|:-:|:-:|
