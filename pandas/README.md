@@ -11,13 +11,13 @@ import pandas as pd
 одномерный индексированный массив данных фиксированного типа
 
 ```Python
-data = pd.Series(['December', 'January', 'February'], index=['Dec', 'Jan', 'Feb'])
+data = pd.Series(['December', 'January', 'February'], index=['Dec', 'Jan', 'Feb'], name='Winter')
 ```
 ```Markdown
 > Dec    December
   Jan     January
   Feb    February
-  dtype: object
+  Name: Winter, dtype: object
 ```
 
 &nbsp;
