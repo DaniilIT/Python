@@ -26,17 +26,17 @@ a = np.array([[1, 2, 3], [4, 5, 6]])
 ```
 
 ```Python
-print('измерений: ', a.ndim) # 2
-print('размерность: ', a.shape) # (2, 3)
-print('количество элементов: ', a.size) # 6
-print('тип элементов: ', a.dtype) # int64
+print('измерений: ', a.ndim)  # 2
+print('размерность: ', a.shape)  # (2, 3)
+print('количество элементов: ', a.size)  # 6
+print('тип элементов: ', a.dtype)  # int64
 ```
 
 ```Python
-print(a[1, 2]) # 6
-print(a[:, 2]) # [3, 6]
-print(a[1, [0, 2]]) # [4, 6]
-print(a > 4]) # [5, 6]
+print(a[1, 2])  # 6
+print(a[:, 2])  # [3, 6]
+print(a[1, [0, 2]])  # [4, 6]
+print(a > 4])  # [5, 6]
 ```
 
 ```Python
@@ -113,14 +113,16 @@ np.eye(3)
 ```Python
 import random
 
-random.random() # случайное число [0.0, 1.0)
-random.randint(0, 9) # случайное целое число [0, 9]
-random.randrange(0, 10, 2) # случайное число из [0, 2, 4, 6, 8]
+random.random()  # случайное число [0.0, 1.0)
+random.randint(0, 9)  # случайное целое число [0, 9]
+random.randrange(0, 10, 2)  # случайное число из [0, 2, 4, 6, 8]
 
 words = ['A', 'B', 'C', 'D', 'E']
-random.choice(words)
+random.choice(words)  # выбрать
+random.sample(words, 2)  # выьрать несколько
+random.shuffle(words)  # перемешать на месте
 
-random.seed(1) # seed для воспроизводимости, по умолчанию системное время
+random.seed(1)  # seed для воспроизводимости, по умолчанию системное время
 a = np.array([random.random() for _ in range(5)])
 ```
 ```Markdown
@@ -129,8 +131,8 @@ a = np.array([random.random() for _ in range(5)])
 
 &nbsp;
 ```Python
-# np.random.rand(2, 4) # равномерное распределение
-rng = np.random.default_rng(0) # создание экземпляра Generator
+# np.random.rand(2, 4)  # равномерное распределение
+rng = np.random.default_rng(0)  # создание экземпляра Generator
 a = rng.random(size=(2, 4))
 ```
 ```Markdown
@@ -142,7 +144,7 @@ a = rng.random(size=(2, 4))
 
 &nbsp;
 ```Python
-# np.random.randn(2, 4) # нормальное распределение
+# np.random.randn(2, 4)  # нормальное распределение
 rng = np.random.default_rng(0)
 a = rng.normal(size=(2, 4))
 ```
@@ -213,7 +215,7 @@ l = np.any(e == f)
 
 ```Python
 a = np.arange(1, 7).reshape((2, 3))
-b = np.where((a < 2) | (a > 5), -1, a) # a[(a < 2) | (a > 5)] = -1
+b = np.where((a < 2) | (a > 5), -1, a)  # a[(a < 2) | (a > 5)] = -1
 ```
 ```Markdown
 > a = [[1, 2, 3],  b = [[-1,  2,  3],
@@ -233,8 +235,8 @@ c = np.arange(1, 3).reshape((2, 1))
 ```
 
 ```Python
-d = np.vstack([a, b]) # np.concatenate([a, b], axis=0)
-e = np.hstack([a, b]) # np.concatenate([a, b], axis=1)
+d = np.vstack([a, b])  # np.concatenate([a, b], axis=0)
+e = np.hstack([a, b])  # np.concatenate([a, b], axis=1)
 f = np.column_stack([a, c])
 ```
 ```Markdown
@@ -286,7 +288,7 @@ $l2\ норма\ \text{(евклидово расстояние)}:\ \left\Vert \
 
 ```Python
 x = np.array([1, 2, -2])
-l2 = np.linalg.norm(a) # ord=2
+l2 = np.linalg.norm(a)  # ord=2
 ```
 ```Markdown
 > x = [1, 2, -2]   l2 = 3.
@@ -305,7 +307,7 @@ $<\vec{a} + \vec{b}, \vec{c}> = <\vec{a}, \vec{c}> + <\vec{b}, \vec{c}>$
 ```Python
 a = np.array([1, 2, 3])
 b = np.array([4, 1, 0])
-product = np.dot(a, b) # a.dot(b)
+product = np.dot(a, b)  # a.dot(b)
 ```
 ```Markdown
 > a = [1, 2, 3]   b = [4, 1, 0]   product = 6
@@ -325,7 +327,7 @@ $AE = EA = A$
 ```Python
 a = np.array([[1, 0, 2], [2, 3, 1]])
 b = np.array([[4, 1, 0, 2], [2, 1, 3, 4], [1, 4, 2, 0]])
-product = a @ b # np.dot(a, b)
+product = a @ b  # np.dot(a, b)
 ```
 ```Markdown
 > a = [[1, 0, 2],  b = [[4, 1, 0, 2],  product =  [[ 6,  9,  4,  2],
@@ -343,7 +345,7 @@ $(AB)^T = B^T A^T$
 
 ```Python
 a = np.arange(1, 9).reshape((2, 4))
-t = np.transpose(a) # a.T
+t = np.transpose(a)  # a.T
 ```
 ```Markdown
 > a = [[1, 2, 3, 4],  t = [[1, 5],

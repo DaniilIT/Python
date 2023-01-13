@@ -165,7 +165,7 @@ df.insert(1, 'col0', np.arange(5)*2)
 
 &nbsp;
 ```Python
-df.drop(4, axis=0, inplace=True) # ('col0', axis=1)
+df.drop(4, axis=0, inplace=True) # ('col0', axis=1) или (columns='col0')
 ```
 ||**month**|**col0**|**col1**|**col2**|**col3**|
 |:-:|:-:|:-:|:-:|:-:|:-:|
