@@ -131,9 +131,12 @@ print(f'Accuracy={accuracy_score(y_valid, y_pred)}')
 
 <img src="images/conm.png" alt="Confusion Matrix" title="Матрица неточностей" style="height: 240px;"/>
 
-**Accuracy** $= \cfrac{TP + TN}{TP + TN + FP + FN}$ - доля верных ответов \
-**Precision** $= \cfrac{TP}{TP + FP}$ - точность \
-**Recall** $= \cfrac{TP}{TP + FN}$ - полнота \
+**Accuracy** $= \cfrac{TP + TN}{TP + TN + FP + FN}$ - доля верных ответов
+
+**Precision** $= \cfrac{TP}{TP + FP}$ - точность
+
+**Recall** $= \cfrac{TP}{TP + FN}$ - полнота
+
 **F1 score** $= \cfrac{2 \cdot Precision \cdot Recall}{Precision + Recall}$ - средневзвешенное
 
 
@@ -146,10 +149,14 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolu
 print(f'MSE={mean_squared_error(y_valid, y_pred)}')
 ```
 
-**MAE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}|y_i - \hat{y}_i|$ - mean absolute error \
-**MAPE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}\left|\cfrac{y_i - \hat{y}_i}{\hat{y}_i}\right|$ - mean absolute percentage error \
-**MSE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}(y_i - \hat{y}_i)^2$ - mean squared error \
-**R^2** $= 1 - \cfrac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \overline{y})^2}$ - коэффициент детерминации (доля объясненной дисперсии)
+
+**MAE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}|y_i - \hat{y}_i| $ - mean absolute error
+
+**MAPE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}\left|\cfrac{y_i - \hat{y}_i}{\hat{y}_i}\right|$ - mean absolute percentage error
+
+**MSE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}(y_i - \hat{y}_i)^2$ - mean squared error
+
+$\text{R}^2 = 1 - \cfrac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \overline{y})^2}$ - коэффициент детерминации (доля объясненной дисперсии)
 
 
 ## k-fold, cross-validation
@@ -223,7 +230,8 @@ y_pred = search.best_estimator_.predict(X)
 
 нахождения локального минимума дифференцируемой функции
 
-$L(\omega) = MSE = \cfrac{1}{n} \sum\limits_{i=1}^n(\langle \omega, x_i \rangle - y_i)^2 \rightarrow min$ \
+$L(\omega) = MSE = \cfrac{1}{n} \sum\limits_{i=1}^n(\langle \omega, x_i \rangle - y_i)^2 \rightarrow min$
+
 $\nabla_{w} L = \text{basic_term} = \cfrac{2}{n} \cdot X^T (X \omega - y)$
 
 шаг градиентного спуска: $\omega = \omega - \alpha \cdot \nabla_{w} L$
@@ -233,17 +241,20 @@ $\nabla_{w} L = \text{basic_term} = \cfrac{2}{n} \cdot X^T (X \omega - y)$
 для борьбы с мультиколлинеарностью можно добавить регуляризационное слагаемое, 
 которое будет штрафовать за большие коэффициенты
 
-$L(\omega) = MSE + C \cdot R(\omega) \rightarrow min$ \
+$L(\omega) = MSE + C \cdot R(\omega) \rightarrow min$
+
 $\nabla_{w} L = \text{basic_term} + \text{regularization_term}$
 
 #### $L_1$ Регуляризация (Lasso-регрессия)
 
-$R(\omega) = \sum\limits_{i=1}^n |\omega_i|$ \
+$R(\omega) = \sum\limits_{i=1}^n |\omega_i|$
+
 $\text{regularization_term} = (0, sign(\omega_1), ..., sign(\omega_n))^T$
 
 #### $L_2$ Регуляризация (Ridge-регрессия)
 
-$R(\omega) = \sum\limits_{i=1}^n \omega_i^2$ \
+$R(\omega) = \sum\limits_{i=1}^n \omega_i^2$
+
 $\text{regularization_term} = (0, 2\omega_1, ..., 2\omega_n)^T$
 
 ```python
@@ -342,7 +353,8 @@ $loglos = -\cfrac{1}{n} \sum\limits_{i=1}^n (y_i \cdot \ln(\hat{y}_i) + (1 - y_i
 
 $P(y=1) = \sigma(\langle x, \omega \rangle) = \cfrac{1}{1 + e^{-\langle x, \omega \rangle}}$
 
-$ПP(y_i) \Rightarrow \ln(П P(y_i)) = \sum \ln(P(y_i)) \rightarrow max$ \
+$ПP(y_i) \Rightarrow \ln(П P(y_i)) = \sum \ln(P(y_i)) \rightarrow max$
+
 $L(\omega) = -\sum\limits_{i=1}^n \ln(\cfrac{1}{1 + e^{-\langle x, \omega \rangle}}) =
 \cfrac{1}{n} \sum\limits_{i=1}^n \ln(1 + e^{-y_i \cdot \langle x_i, \omega \rangle}) \rightarrow min$
 
@@ -428,8 +440,10 @@ y_pred = model_clf.predict_proba(X_valid)
 устойчив к несбалансированным классам,
 график строится через сортировку вероятностей предсказаний на осях TPR и FPR
 
-$TPR = \frac{TP}{TP + FN}$ \
-$FPR = \frac{FP}{FP + TN}$ \
+$TPR = \frac{TP}{TP + FN}$
+
+$FPR = \frac{FP}{FP + TN}$
+
 $\text{ROC-AUC} = \frac{TPR \cdot FPR}{2} + TPR \cdot (1 - FPR) + \frac{(1-TPR) \cdot (1-FPR)}{2} 
 = \frac{1 + TPR - FPR}{2}$
 
