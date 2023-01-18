@@ -232,9 +232,9 @@ y_pred = search.best_estimator_.predict(X)
 
 $L(\omega) = MSE = \cfrac{1}{n} \sum\limits_{i=1}^n(\langle \omega, x_i \rangle - y_i)^2 \rightarrow min$
 
-$\nabla_{w} L = \text{basic_term} = \cfrac{2}{n} \cdot X^T (X \omega - y)$
+$\nabla_w L = \text{basicTerm} = \cfrac{2}{n} \cdot X^T (X \omega - y)$
 
-шаг градиентного спуска: $\omega = \omega - \alpha \cdot \nabla_{w} L$
+шаг градиентного спуска: $\omega = \omega - \alpha \cdot \nabla_w L$
 
 ### Регуляризация
 
@@ -243,19 +243,19 @@ $\nabla_{w} L = \text{basic_term} = \cfrac{2}{n} \cdot X^T (X \omega - y)$
 
 $L(\omega) = MSE + C \cdot R(\omega) \rightarrow min$
 
-$\nabla_{w} L = \text{basic_term} + \text{regularization_term}$
+$\nabla_w L = \text{basicTerm} + \text{regularizationTerm}$
 
 #### $L_1$ Регуляризация (Lasso-регрессия)
 
 $R(\omega) = \sum\limits_{i=1}^n |\omega_i|$
 
-$\text{regularization_term} = (0, sign(\omega_1), ..., sign(\omega_n))^T$
+$\text{regularizationTerm} = (0, sign(\omega_1), ..., sign(\omega_n))^T$
 
 #### $L_2$ Регуляризация (Ridge-регрессия)
 
 $R(\omega) = \sum\limits_{i=1}^n \omega_i^2$
 
-$\text{regularization_term} = (0, 2\omega_1, ..., 2\omega_n)^T$
+$\text{regularizationTerm} = (0, 2\omega_1, ..., 2\omega_n)^T$
 
 ```python
 def soft_sign(x, eps=1e-7):
@@ -358,11 +358,12 @@ $ПP(y_i) \Rightarrow \ln(П P(y_i)) = \sum \ln(P(y_i)) \rightarrow max$
 $L(\omega) = -\sum\limits_{i=1}^n \ln(\cfrac{1}{1 + e^{-\langle x, \omega \rangle}}) =
 \cfrac{1}{n} \sum\limits_{i=1}^n \ln(1 + e^{-y_i \cdot \langle x_i, \omega \rangle}) \rightarrow min$
 
-$\nabla_{w} L = \text{basic_term} = -\cfrac{1}{n} \sum\limits_{i=1}^n y^i \cdot 
+$\nabla_w L = \text{basicTerm} = -\cfrac{1}{n} \sum\limits_{i=1}^n y^i \cdot 
 \left( 1 - \sigma( y^i \cdot \langle x^i, \omega \rangle ) \right) \cdot x^i$
 
 ```python
 class MyLogisticRegression(object):
+
     def __init__(self, C=1):
         self.coef_ = None
         self.intercept_ = None
@@ -444,8 +445,7 @@ $TPR = \frac{TP}{TP + FN}$
 
 $FPR = \frac{FP}{FP + TN}$
 
-$\text{ROC-AUC} = \frac{TPR \cdot FPR}{2} + TPR \cdot (1 - FPR) + \frac{(1-TPR) \cdot (1-FPR)}{2} 
-= \frac{1 + TPR - FPR}{2}$
+$\text{ROC-AUC} = \frac{TPR \cdot FPR}{2} + TPR \cdot (1 - FPR) + \frac{(1-TPR) \cdot (1-FPR)}{2} = \frac{1 + TPR - FPR}{2}$
 
 ```python
 from sklearn.metrics import roc_auc_score
