@@ -181,6 +181,7 @@ a = bytearray([12, 8, 25])
 s = {1, 2, 3}
 s.add(4)
 s.update((5, 6))
+s.discard(6)  # удалит, если есть
 ```
 ```python
 a = {1, 2, 3, 4}
