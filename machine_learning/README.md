@@ -72,7 +72,7 @@ X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.25)
 
 ### Нормализация
 
-![Нормализация](images/m_norm.png "Нормализация")
+<img src="images/m_norm.png" alt="Нормализация" title="Нормализация" style="height: 240px;"/>
 
 $$
 x_i = \cfrac{x_i - x_{min}}{x_{max} - x_{min}} \ \Rightarrow \ x_{min} = 0, \ x_{max} = 1
@@ -80,7 +80,7 @@ $$
 
 ### Стандартизация
 
-![Стандартизация](images/m_std.png "Стандартизация")
+<img src="images/m_std.png" alt="Стандартизация" title="Стандартизация" style="height: 240px;"/>
 
 $$
 x_i = \cfrac{x_i - \overline{x}}{\sigma_x} \ \Rightarrow \ \overline{x} = 0, \ \sigma_x = 1
@@ -149,8 +149,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolu
 print(f'MSE={mean_squared_error(y_valid, y_pred)}')
 ```
 
-
-**MAE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}|y_i - \hat{y}_i| $ - mean absolute error
+**MAE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}|y_i - \hat{y}_i|$ - mean absolute error
 
 **MAPE** $= \cfrac{1}{n} \sum\limits_{i=1}^{n}\left|\cfrac{y_i - \hat{y}_i}{\hat{y}_i}\right|$ - mean absolute percentage error
 
@@ -353,13 +352,15 @@ $loglos = -\cfrac{1}{n} \sum\limits_{i=1}^n (y_i \cdot \ln(\hat{y}_i) + (1 - y_i
 
 $P(y=1) = \sigma(\langle x, \omega \rangle) = \cfrac{1}{1 + e^{-\langle x, \omega \rangle}}$
 
+<img src="images/sigmoid.png" alt="Сигмоида" title="Сигмоида" style="height: 240px;"/>
+
+$\sigma'(x)=\sigma(x) \cdot (1 - \sigma(x))$
+
 $ПP(y_i) \Rightarrow \ln(П P(y_i)) = \sum \ln(P(y_i)) \rightarrow max$
 
-$L(\omega) = -\sum\limits_{i=1}^n \ln(\cfrac{1}{1 + e^{-\langle x, \omega \rangle}}) =
-\cfrac{1}{n} \sum\limits_{i=1}^n \ln(1 + e^{-y_i \cdot \langle x_i, \omega \rangle}) \rightarrow min$
+$L(\omega) = -\sum\limits_{i=1}^n \ln(\cfrac{1}{1 + e^{-\langle x, \omega \rangle}}) = \cfrac{1}{n} \sum\limits_{i=1}^n \ln(1 + e^{-y_i \cdot \langle x_i, \omega \rangle}) \rightarrow min$
 
-$\nabla_w L = \text{basicTerm} = -\cfrac{1}{n} \sum\limits_{i=1}^n y^i \cdot 
-\left( 1 - \sigma( y^i \cdot \langle x^i, \omega \rangle ) \right) \cdot x^i$
+$\nabla_w L = \text{basicTerm} = -\cfrac{1}{n} \sum\limits_{i=1}^n y^i \cdot \left( 1 - \sigma( y^i \cdot \langle x^i, \omega \rangle ) \right) \cdot x^i$
 
 ```python
 class MyLogisticRegression(object):
