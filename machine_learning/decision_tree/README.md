@@ -45,7 +45,7 @@ figure(figsize = (5, 4))
 sns.heatmap(df.isnull(), cbar=False)
 ```
 
-<img src="missing_heat.png" alt="Тепловая карта пропущенных значений" title="Тепловая карта пропущенных значений" style="height: 380px;"/>
+<img src="images/missing_heat.png" alt="Тепловая карта пропущенных значений" title="Тепловая карта пропущенных значений" style="height: 380px;"/>
 
 ```python
 # обрабатка пропущенных значений
@@ -121,7 +121,7 @@ sns.heatmap(encoded_data.corr(), cmap='coolwarm', vmin=-1, vmax=1, annot=True, f
 plt.show()
 ```
 
-<img src="corr_heat.png" alt="Тепловая карта корреляций" title="Тепловая карта корреляций" style="height: 380px;"/>
+<img src="images/corr_heat.png" alt="Тепловая карта корреляций" title="Тепловая карта корреляций" style="height: 380px;"/>
 
 Видно, что присутствуют линейные корреляции &\rightarrow& неплохой результат выдадут даже самые простые модели.
 
@@ -139,7 +139,7 @@ plt.show()
 
 $Q = L + R$, хотим, чтобы из $p_L$ и $p_R$ одно было $0$, а другое $1$
 
-$\cfraq{L}{Q}H(p_L) + \cfraq{R}{Q}H(p_R) \rightarrow min$, где $H(0) = H(1) = 0$ 
+$\cfrac{L}{Q}H(p_L) + \cfrac{R}{Q}H(p_R) \rightarrow min$, где $H(0) = H(1) = 0$ 
 
 Критерия ветвлений (подбор решающего правила):
 * энтропия (чем больше, тем больше степень хаоса) \
@@ -197,4 +197,4 @@ def plot_feature_importances(gs, column_names, top_n=15):
 plot_feature_importances(alg, X_train.columns.values)
 ```
 
-<img src="important_bar.png" alt="Важность признаков по примеси Джини" title="Важность признаков по примеси Джини" style="height: 380px;"/>
+<img src="images/important_bar.png" alt="Важность признаков по примеси Джини" title="Важность признаков по примеси Джини" style="height: 380px;"/>
