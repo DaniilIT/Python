@@ -35,7 +35,7 @@ drive.mount('/content/drive')
 ```
 
 ```python
-# Загружаем данные
+# загружаем данные
 import numpy as np
 import pandas as pd
 data = pd.read_csv('./drive/MyDrive/.../data.csv')
@@ -107,7 +107,8 @@ X_valid[numerical_cols] = scaler.transform(X_valid[numerical_cols])
 свойства:
 - интерпретируемый (возможно посмотреть k соседей и увидеть что модель усредняла),
 - необходимость задавать метрику расстояния,
-- подвержена проклятию размерности - чем больше признаков, тем меньше плотность объектов,
+- подвержена проклятию размерности - чем больше признаков, тем меньше плотность объектов и медленнее работает,
+- склонен к переобучению,
 - может обрабатывать нелинейные зависимости
 
 ```python
@@ -185,7 +186,7 @@ from sklearn.model_selection import cross_val_score
 
 scorer = make_scorer(lambda y_true, y_pred: mean_squared_error(y_true, y_pred), 
                      greater_is_better=False) # ошибка будет с минусом
-errors = - cross_val_score(knn, X, y, cv=5, scoring=scorer)
+errors = -cross_val_score(knn, X, y, cv=5, scoring=scorer)
 #----------------------------------------------------------------
 
 print('RMSE=', np.mean(errors) ** 0.5) # в масштабе признаков
@@ -216,6 +217,7 @@ y_pred = search.best_estimator_.predict(X)
 
 
 ## Linear Regression (линейная регрессия)
+
 [Идея:](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
 алгоритм прогнозирует значения числовой непрерывной целевой переменной как взвешенную cумму признаков.
 
@@ -338,6 +340,7 @@ y_pred = model_lr.predict(X_valid)
 
 
 ## Логистическая Regression (Логистическая регрессия)
+
 [Идея:](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 линейный алгоритм вычисляет вероятности принадлежности объектов к двум классам подбирая веса 
 для оптимизации логистической функции потерь
@@ -359,6 +362,8 @@ $\sigma'(x)=\sigma(x) \cdot (1 - \sigma(x))$
 $ПP(y_i) \Rightarrow \ln(П P(y_i)) = \sum \ln(P(y_i)) \rightarrow max$
 
 $L(\omega) = -\sum\limits_{i=1}^n \ln(\cfrac{1}{1 + e^{-\langle x, \omega \rangle}}) = \cfrac{1}{n} \sum\limits_{i=1}^n \ln(1 + e^{-y_i \cdot \langle x_i, \omega \rangle}) \rightarrow min$
+
+задача минимизации эмпирического риска, в отличии от минимизации функции потерь, ошибка считается на всей обучающей выборке как доля неправильно классифицированных объектов
 
 $\nabla_w L = \text{basicTerm} = -\cfrac{1}{n} \sum\limits_{i=1}^n y^i \cdot \left( 1 - \sigma( y^i \cdot \langle x^i, \omega \rangle ) \right) \cdot x^i$
 
