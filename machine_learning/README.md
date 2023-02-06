@@ -32,6 +32,8 @@
 # предоставить Colab доступ к Google Drive
 from google.colab import drive
 drive.mount('/content/drive')
+# или скачать прямо в colab
+!gdown <ссылка на csv>
 ```
 
 ```python

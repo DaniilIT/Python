@@ -214,3 +214,11 @@ with open(json_path, 'r') as json_file:
 with open(json_path, 'w') as json_file:
     json.dump(json_dict, json_file, indent=2, ensure_ascii=False)
 ```
+
+
+### IDE
+
+\- интегрированная среда разработки - редактор с подсветвой кода, запуском, автодополнением, проверкой ошибок и еще сотней функций.
+
+`ctrl + shift + R` - запуск\
+`alt + cmd + L` - авто PEP8
