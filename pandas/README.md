@@ -313,6 +313,14 @@ df[['age', 'weight']].apply(['mean', 'std'])
 |**mean**|35.69|91.57|
 |**std**|13.57|34.25|
 
+Map и apply возвращают серию, в которой все значения преобразованы функцией.
+Функция которая передается в map ожидает один элемент, а в apply - строку.
+
+```Python
+df.apply(lambda row: row.age>30, axis='columns')
+df.age.map(lambda age: age>30)
+```
+
 &nbsp;
 ```Python
 # df.sort_index()

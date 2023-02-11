@@ -74,11 +74,15 @@ print(s.find('a'))  # 0  # rfind - с конца
 print(s.replace('a', 'c'))  # cb-cbA
 ```
 
-> [&#x1f352;](https://unicode-table.com/ru/)
+> `&#x1f352;]` [&#x1f352;](https://unicode-table.com/ru/)
 
 ```python
+cherries_name = print('🍒'.encode('ascii', 'namereplace'))  # b'\\N{CHERRIES}'
+print('\N{CHERRIES}')  # '🍒'
+
+print(f'{ord("♥"):016b}')  # 0010011001100101
+heart_unicode = hex(ord('♥'))  # 0x2665
 heart_symbol = chr(0x2665)  # '♥'
-unicode_code = hex(ord('♥'))  # 0x2665
 
 with open("text.txt", "w", encoding="utf-16", errors='ignore') as f:  # ascii, cp1251
     f.write(heart_symbol)
