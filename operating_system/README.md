@@ -3,7 +3,7 @@
 \- текстовый интерфейс для работы с операционной системой.
 
 **cwd** - current work directory\
-**pwd** - показать путь к cwd
+**pwd** - показать путь к cwd (*cd* для windows)
 ```
 > /Users/daniil/Documents/Learning/Python
 ```
@@ -18,7 +18,7 @@
 `q` - выход из режима просмотра\
 `ctrl + c` - завершение процесса ('exit()')
 
-**ls** - показать содержимое cwd
+**ls** - показать содержимое cwd (*dir* для windows)
 * **-l** показать в длинной формате
 * **-R** показать все файлы в папках
 * **-a** показать скрытые файлы
@@ -29,9 +29,9 @@
 * **~** переместиться в домашнюю директорию
 
 **mkdir** - создать директорию\
-**rmdir** - удалить директорию\
+**rmdir** - удалить директорию (*rd* для windows)\
 **touch** - создать файл\
-**rm** - удалить файл (* - удалить все файлы)\
+**rm** - удалить файл (* - удалить все файлы) (*del* для windows)\
 **cp** - копировать (и вставить в новое место)\
 **mv** - переместить или переименовать
 
@@ -41,12 +41,14 @@
 echo 'Hi' > file.txt
 ```
 
+**open** - открыть файл\
 **cat** - показать содержимое файла\
 **head** - показать первые 10 строк\
 **tail -n 2** - показать последние 2-е строки
 
 **less** пейджер - чтение файлов\
-**Grep** - поиск по файлу\
+**Grep** - поиск\
+Например: *ls | grep .txt* или *grep -n 'word' text.txt* (выведутся строки и их номера)
 **Nano, Emacs, Vim** - редактирование файлов
 
 `i` - режим ввода\
@@ -135,10 +137,17 @@ sys.exit(0)  # выход из python
 
 ```python
 import logging
-logging.basicConfig(filename='app.log', filemode='w')
+logging.basicConfig(filename='app.log', filemode='w', level=logging.INFO,
+                    format='%(process)d - %(levelname)s - %(asctime) - %(message)', datefmt='%d-%b-%y %H:%M:%S')
 logging.warning('Соединение с сервером прервано.')
 logging.error('Сервер упал.')
 ```
+
+- DEBAG
+- INFO
+- <u>WARNING</u>
+- ERROR
+- CRITICAL
 
 
 ### argparse
