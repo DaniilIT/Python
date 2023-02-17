@@ -27,7 +27,7 @@ class Account:
         self._private()
         self.__balance = balance
         
-    def _private(self):
+    def _private(self):  # underscore
         print('hided')
         
 account = Account(0)

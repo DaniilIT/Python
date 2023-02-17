@@ -61,11 +61,12 @@ print(bool.__bases__)  # (<class 'int'>,)
 > последовательность символов в кодировке Unicode
 
 ```python
-s = '-'.join("ab.abA ".strip().split('.'))
+s = '-'.join('ab.abA '.strip().split('.'))
 # s = "ab-abA"
 print(s.partition('-'))  # ('ab', '-', 'abA')  # три части
 print(s.startswith('ab'))  # True
 
+print(s.ljust(8, '-'))  # 'ab-abA--'
 print(s.capitalize())  # Ab-aba
 print(s.upper())  # AB-ABA
 print(s.lower())  # ab-aba
@@ -85,15 +86,40 @@ print(f'{ord("♥"):016b}')  # 0010011001100101
 heart_unicode = hex(ord('♥'))  # 0x2665
 heart_symbol = chr(0x2665)  # '♥'
 
-with open("text.txt", "w", encoding="utf-16", errors='ignore') as f:  # ascii, cp1251
+with open('text.txt', 'w', encoding='utf-16', errors='ignore') as f:  # ascii, cp1251
     f.write(heart_symbol)
+```
+
+#### Форматирование строк
+
+```python
+name = 'Daniil'
+number = 3.14159
+code = 42
+
+# оператор %
+print('%s: %05.2f: 0x%x' % (name, number, code))  # 'Daniil: 03.14: 0x2a'
+
+# метод format
+print('{name:8s}: {number:05.2f}: {code:#x}'.format(name=name, number=number, code=code))
+print('{:8s}: {:05.2f}: {:#x}'.format(name, number, code))
+print('{2:8s}\: {0:05.2f}: {1:#x}'.format(number, code, name))
+
+# f-строки
+print(f'{name:8s}: {number:05.2f}: {code:#x}')
+
+# шаблоны (нет доступа к произвольным переменным)
+from string import Template
+
+t = Template('${name}: ${number}: ${code}')
+print(t.substitute(name=name, number=number, code=code))
 ```
 
 - bytes (бинарные данные)
 
 ```python
-b = b"text"  # ascii
-b = b"\x01\x02\x03\x04"
+b = b'text'  # ascii
+b = b'\x01\x02\x03\x04'
 ```
 
 4) ### tuple (кортежи)
