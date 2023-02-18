@@ -48,7 +48,7 @@ echo 'Hi' > file.txt
 
 **less** пейджер - чтение файлов\
 **Grep** - поиск\
-Например: *ls | grep .txt* или *grep -n 'word' text.txt* (выведутся строки и их номера)
+Например: *ls | grep .txt* или *grep -n 'word' text.txt* (выведутся строки и их номера) *-i* (игнорировать регистр)
 **Nano, Emacs, Vim** - редактирование файлов
 
 `i` - режим ввода\
@@ -217,11 +217,16 @@ with open(file_path, 'r') as file:
 ```python
 import json
 
-with open(json_path, 'r') as json_file:
-    json_dict = json.load(json_file)
-    
 with open(json_path, 'w') as json_file:
     json.dump(json_dict, json_file, indent=2, ensure_ascii=False)
+    
+try:
+    with open(json_path, 'r') as json_file:
+        json_dict = json.load(json_file)
+except FileNotFoundError:
+    pass
+except json.JSONDecodeError:
+    pass
 ```
 
 

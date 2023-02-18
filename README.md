@@ -45,8 +45,13 @@ print(x.real, x.imag)  # 52.0 4.0
 - #### float (числа с плавающей запятой)
 
 ```python
-a = 3.4
-a.is_integer()  # False
+number = 3.14
+number.is_integer()  # False
+
+from math import ceil, floor, trunc
+round(number, 2)  # округление до ближайшего или четного
+int(number) или trunc(number)  # округление в сторону 0
+ceil(number) и floor(number)  # округление вправо и влево
 ```
 
 2) ### bool (логические значения)
