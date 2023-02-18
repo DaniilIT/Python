@@ -178,8 +178,9 @@ df.drop(4, axis=0, inplace=True) # ('col0', axis=1) или (columns='col0')
 ## первичное исследование
 
 ```Python
-df = pd.read_csv("./data/data.csv", index_col=0) # sep=','
+df = pd.read_csv('./data/data.csv', index_col=0) # sep=','
 # df.to_csv('./data/data.csv') # index=False
+# df = pd.read_excel('./data/data.xlsx').fillna('').to_dict(orient='records')
 
 df.head() # 5
 ```
