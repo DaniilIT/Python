@@ -66,6 +66,9 @@ echo 'Hi' > file.txt
 import os
 
 print(os.getenv('HOME'))  # переменные среды
+print(os.environ.get('HOME'))  # '/Users/daniil'
+os.environ['USER'] = 'Daniil'
+
 print(os.getcwd())  # показать путь к текущей директории
 os.listdir('./data')  # показать содержимое cwd
 os.chdir('..')  # перейти в директорию
@@ -186,10 +189,28 @@ print(args.page)
 
 ### dotenv
 
+**Переменные окружения** — это набор пар ключ-значение для пользовательской среды.
+
+'''
+pip install python-dotenv
+'''
+
+```python
+TOKEN=secret
+```
+
 ```python
 from dotenv import dotenv_values
 
 token = dotenv_values('.env')['TOKEN']
+```
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv(oveгride=True)
+token = os.getenv('TOKEN')
 ```
 
 

@@ -9,7 +9,7 @@
 *Библиотека* - набор пакетов.\
 **Фреймворк** - набор готовых компонентов (библиотек), из которых формируется приложение.
 
-$ \Leftrightarrow $ [Веб-приложение] $ \Leftrightarrow $ [WSGI-сервер] $ \Leftrightarrow $ [Flask-приложение]
+$\Leftrightarrow$ [Веб-приложение] $\Leftrightarrow$ [WSGI-сервер] $\Leftrightarrow$ [Flask-приложение]
 
 Flask включает в себя работу с:
 * маршрутами и методами
@@ -30,9 +30,9 @@ from flask import Flask
 app = Flask(__name__)  # указать, где искать ресурсы
 
 @app.route('/')  # маршрутизация - связь функции с URL-адресом
-def page_index():  # названия функций должны быть уникальными
+def index_page():  # названия функций должны быть уникальными
     return '<p>Hello, World!</p>'  # возвращает только строку html
-# app.add_url_rule('/', view_func=page_index)  # без декоратора
+# app.add_url_rule('/', view_func=index_page)  # без декоратора
 
 @app.route('/post/<int:post_id>/') # переменные
 def show_post(post_id):
@@ -42,7 +42,7 @@ def show_post(post_id):
 def show_card(subpath):
     return f'Card {subpath}'
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # для команды flask не нужно
     app.run(debug==True)
 ```
 
@@ -89,7 +89,7 @@ template = env.get_template('template.html')  # найти html-шаблон
 
 rendered_page = template.render(cards=cards, name='Daniil')
 
-with open('index.html', 'w', encoding="utf8") as file:
+with open('index.html', 'w', encoding='utf8') as file:
     file.write(rendered_page)
 ```
 
@@ -147,19 +147,24 @@ template
 **SPA** (Single Page Application) - сервер отдает JSON и шаблон, а шаблонизация происходит на стороне клиента.
 
 ```python
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
 @app.route('/')
-def page_index():
+def index_page():
     return render_template('index.html', cards=cards)
+
+@app.route('/')
+def api_page():
+    data = {'name': 'Daniil'}
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run()
 ```
 
-легирования — ведения записей по важным для системы событиям.
+Логирование — ведение записей по важным для системы событиям.
 
 ```python
 import logging
@@ -170,7 +175,7 @@ logging.basicConfig(filename='basic.log', level=logging.DEBUG)
 app = Flask(__name__)
 
 @app.route('/')
-def page_index():
+def index_page():
     logging.debug('Главная страница запрошена')
     return '<p>Hello, World!</p>'
 ```
@@ -199,7 +204,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 @app.route('/search/')
-def page_search():
+def search_page():
     s = request.args.get('s')
     return f'<p>Hello, {s}!</p>'
 ```
@@ -223,13 +228,13 @@ from flask import Flask, request
 app = Flask(__name__)
 
 @app.route('/add/', methods=['POST'])
-def page_add():
+def add_page():
     text = request.form.get('text')
     return f'<p>Hello, {text}!</p>'
 
 @app.route('/add/', methods=['GET', 'POST'])
-def page_add():
-    s = request.values.get('s')
+def add_page():
+    s = request.values.get('s') # values = args + folder
     text = request.values.get('text')
     return f'<p>Hello, {s or text}!</p>'
 ```
@@ -240,8 +245,8 @@ def page_add():
 ```html
 <h2>форма загрузки</h2>
 <form action='/upload/' method='post' enctype='multipart/form-data'>  <!-- кодировка -->
-    <input> type='file' name='picture'>
-    <input type='submit' value='отправить'>
+    <input type='file' name='picture' />
+    <input type='submit' value='отправить' />
 </form>
 ```
 
@@ -262,12 +267,12 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # ограничение на 2MB
 
 @app.errorhandler(413)  # можно вызвать `abort(413)`
-def page_entity_too_large(error):
+def entity_too_large_page(error):
     return 'Файл слишком большой', 413
 
 @app.route('/upload/', methods=['POST'])
-def page_upload():
-    picture = request.files.get("picture")  # объект FileStorage
+def upload_page():
+    picture = request.files.get('picture')  # объект FileStorage
     
     if picture:
         filename = picture.filename
@@ -293,15 +298,39 @@ def page_upload():
 ```python
 from flask import send_from directory
 
-@app.route("/uploads/<path:path>")
+@app.route('/uploads/<path:path>')
 def staticdir(path):
-    return send_from_directory("uploads", path)
+    return send_from_directory('uploads', path)
 ```
 
 
 ## Blueprint
 
-/- самостоятельный пакет Flask-приложения.
+\- самостоятельный пакет Flask-приложения.
+
+```python
+# main/views.py
+from flask import Blueprint, render_template
+
+main_blueprint = Blueprint('main', __name__, template_folder='templates')
+
+@profile_blueprint.route('/')
+def index_page():
+    return render_template('index.html')
+```
+
+```python
+# app.py
+from flask import Flask
+
+from main.views import main_blueprint
+
+app = Flask(__name__)
+app.register_blueprint(main_blueprint)
+
+if __name__ == '__main__':
+    app.run()
+```
 
 ```
 profile\
@@ -313,7 +342,7 @@ profile\
 ```python
 from flask import Blueprint, render_template
 
-profile_blueprint = Blueprint('profile', __name__, template_folder='templates')
+profile_blueprint = Blueprint('profile', __name__, static_folder='static', template_folder='templates')
 
 @profile_blueprint.route('/profile/')
 def profile_page():
@@ -346,6 +375,161 @@ app.register_blueprint(profile_blueprint, url_prefix='/profile/') # ! мб бе�
 # profile/views.py
 @profile_blueprint.route('/')
 ```
+
+
+## Конфигурация
+
+```python
+from flask import Flask
+app = Flask(__name__)
+print(app.config)
+```
+
+```
+{'APPLICATION_ROOT': '/',
+ 'DEBUG': False,
+ 'ENV': 'production',
+ 'PROPAGATE_EXCEPTIONS': None,
+ 'SECRET_KEY': None,
+ 'SERVER_NAME': None,
+ 'TESTING': False,
+ 'JSON_AS_ASCII' = None,
+ ...
+}
+```
+
+```python
+# config.py
+
+DEBUG = True
+FLASK_ENV: 'development'
+SECRET_KEY = 'secret'
+TESTING = True
+```
+
+```python
+from flask import Flask
+
+app = Flask(__name__)
+app.config.from_pyfile('config.py')
+# print(app.config.get('PATH'))
+
+@app.route('/')
+def index_page():
+    return '<p>Hello, World!</p>'
+
+if __name__ == '__main__':
+    app.run()
+```
+
+---
+```
+# .env
+APP_CONFIG=development
+# APP_CONFIG=preduction
+```
+
+```python
+# config.py
+
+class Config:
+    DEBUG = True
+    STATIC_FOLDER = 'static'
+    TEMPLATES_FOLDER = 'templates'
+    PATH = "data.json"
+```
+
+```python
+from flask import Flask
+from config import Config
+
+app = Flask(__name__)
+app.config.from_object(Config)
+# print(app.config.get('PATH'))
+
+@app.route('/')
+def index_page():
+    return '<p>Hello, World!</p>'
+
+if __name__ == '__main__':
+    app.run()
+```
+
+## Типичное файловое дерево FLASK
+
+```
+# арр (папка с блюпринтами)
+
+- main
+- - __init__.py
+- - templates
+- - views.ру
+- - tests
+
+- blueprint_1
+- - __init__.py
+- - dao
+- - templates
+- - static
+- - views.ру
+- - tests
+
+- blueprint_2
+- - __init__.py
+- - dao
+- - templates
+- - static
+- - views.ру
+- - tests
+
+data
+- candidates.json
+- vacancies.json
+
+- static
+
+- tests
+- - conftest.py
+- - blueprint_1
+- - blueprint_2
+
+config.py (DevelopmenConfig, ProductionConfig)
+
+requirements.txt
+
+app.py
+
+.env
+
+.gitignore
+
+README.md
+```
+
+```python
+# candidates/views.ру
+
+from flask import Blueprint, rendertemplate
+from .dao.candidate_dao import CandidateDAO
+
+candidates_blueprint = Blueprint('candidates_blueprint', __name__, template_folder='templates')
+
+candidates dao = CandidateDAO('./data/candidates.json')
+
+@candidates_blueprint.route('/candidates/')
+def candidates_all_page():
+    candidates = candidates_dao.get_all()
+    return render_template('candidates_index.html', candidates=candidates)
+
+# Вьюшка для одного кандидата
+@candidates_blueprint.route('/candidates/<int:pk>/')
+def candidate_page(pk):
+    candidate = candidates_dao.get_by_id(pk)
+    return render_template('candidates_single.html', candidate=candidate)
+```
+
+
+            
 
 
 
