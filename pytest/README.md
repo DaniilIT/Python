@@ -86,6 +86,7 @@ def test_my_function_3():
     assert my_function(3) == 8, 'my_function is wrong for 3'
 ```
 
+Запуск:
 ```
 pytest
 # или (можно без tests/__init__.py)
@@ -239,11 +240,13 @@ class CandidatesDAO:
         self.path = path
         
     def load_data(self):
+        """ Возвращает всех кандидатов
+        """
         candidates = []
-        with open(self.path, 'r', encoding='utf-8') as file:
-            candidates_data = json.load(file)
+        with open(self.path, 'r', encoding='utf-8') as json_file:
+            raw_candidates = json.load(json_file)
 
-            for candidate in candidates_data:
+            for candidate in raw_candidates:
                 candidates.append(Candidate(
                     candidate.get('id'),
                     candidate.get('name'),
@@ -252,31 +255,44 @@ class CandidatesDAO:
                 ))
         return candidates
 
-    def get_all(self):
-        """ Возвращает список со всеми кандидатами
-        """
-        candidates = self.load_data()
-        return candidates
-
-    def get_by_skill(self, skill):
-        candidates = self.load_data()
-        skilled_candidates = []
-        skill_lower = skill.lower()
-
-        for candidate in candidates:
-            candidate_skills = candidate.skills.lower().split(', ')
-            if skill_lower in candidate_skills:
-                skilled_candidates.append(candidate)
-                
-        return skilled_candidates
-
     def get_by_id(self, candidate_id):
         """ Возвращает одного кандидата по его id
         """
         candidates = self.load_data()
-        for candidate in candidate:
+        for candidate in candidates:
             if candidate.id == candidate_id:
                 return candidate
+```
+
+Тест DAO:
+```python
+# candidates_dao_test.py
+import pytest
+from modules.candidates.dao.candidate import Candidate
+from modules.candidates.dao.candidate_dao import CandidateDAO
+
+
+@pytest.fixture()
+def candidate_dao():
+    candidate_dao_instance = CandidateDAO('./data/candidates.json')
+    return candidate_dao_instance
+
+
+class TestCandidateDAO:
+    def test_get_all(self, candidates_dao):
+        """ Проверяем, верный ли список кандидатов возвращается
+        """
+        candidates = candidates_dao.get_all()
+        assert isinstance(candidates, list)
+        assert len(candidates) > 0
+        assert isinstance(candidates[0], Candidate)
+        
+    def test_get_by_id(self, candidates_dao):
+        """ Проверяем, верный ли кандидат возвращается при запросе одного
+        """
+        candidate = candidates_dao.get_by_id(1)
+        assert isinstance(candidate, Candidate)
+        assert candidate.id == 1
 ```
 
 
@@ -290,6 +306,10 @@ from app import app
 @pytest.fixture()
 def test_client():
     return app.test_client()  # сервер не поднимается, но на запросы отвечает
+
+@pytest.fixture()
+def key_should_be():
+    return {'name', 'pk'}
 ```
 
 Тест views:
@@ -299,69 +319,24 @@ import pytest
 
 class TestMain:
     def test_root_status(self, test_client):
-        """ Проверяем при запросе кандидатов нужный статус код
-        """
         response = test_client.get('/', follow_redirects=True)
-        assert response.status_code == 200, 'Статус код не верный'
+        assert response.status_code == 200
         
     def test_root_content(self, test_client):
         response = test_client.get('/', follow_redirects=True)
-        assert 'Это главная страничка' in response.data.decode('utf-8'), 'Контент не верный'
+        assert 'Это главная страничка' in response.data.decode('utf-8')
         
-    def test_json_json(self, test_client):
+    def test_json_data(self, test_client, key_should_be):
         response = test_client.get('/json/', follow_redirects=True)
-        assert response.json.get('name') == 'Daniil', 'Имя получено неверно'
+        assert set(response.json.keys()) == key_should_be
         
     def test_search(self, test_client):
         params = {'s': 'cat'}
         response = test_client.get('/search', query_string=params)
-        assert response.status_code == 200, 'Статус код не верный'
-        assert len(response.json) == 3
+        assert response.status_code == 200
         
     def test_form(self, test_client):
         data = {'name': 'Daniil'}
         response = test_client.post('/form', json=data)
-        assert response.status_code == 200, 'Статус код не верный'
-        assert len(response.json) == 3
-
-```
-
-Тест DAO:
-```python
-# candidates_dao_test.py
-import pytest
-from арр.candidates.dao.candidate_dao import CandidateDAO
-
-@pytest.fixture()
-def candidate_dao():
-    candidate_dao_instance = CandidateDAO('./data/candidates.json')
-    return candidate_dao_instance
-
-# Ключи, которые ожидаем у кандидата
-KEY_SHOULD_BE = {'pk', 'name', 'position'}
-
-class TestCandidateDAO:
-    def test_get_all(self, candidates_dao):
-        """ Проверяем, верный ли список кандидатов возвращается
-        """
-        candidates = candidates_dao.get_all()
-        assert type(candidates) == list, 'возвращается не список'
-        assert len(candidates) > 0, 'возвращается пустой список'
-        assert set(candidates[0].keys()) == KEY_SHOULD_BE, 'неверный список'
-        
-    def test_get_by_id(self, candidates_dao):
-        """ Проверяем, верный ли кандидат возвращается при запросе одного
-        """
-        candidate = candidates_dao.get_by_id(1)
-        assert type(candidate) == dict, 'возвращается не словарь'
-        assert candidate['pk'] == 1, 'возвращается неправильный кандидат'
-        assert set(candidate.keys()) == KEY_SHOULD_BE, 'неверный список'
-
-    def test_root_status(self, test_client):
-        response = test_client.get('/', follow_redirects=True)
-        assert response.status_code == 200, 'Статус код не верный'
-        
-    def test_root_content(self, test_client):
-        response = test_client.get('/', follow_redirects=True)
-        assert 'Это главная страничка' in response.data.decode('utf-8'), 'Контент не верный'
+        assert response.status_code == 200
 ```

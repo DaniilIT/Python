@@ -68,7 +68,7 @@ flask run --debug
 Убить процесс по PID: `kill 12058`
 
 
-## [JinJа2](https://jinja.palletsprojects.com/en/latest/)
+## [Jinjа2](https://jinja.palletsprojects.com/en/latest/)
 
 \- html-шаблонизатор.
 
@@ -100,8 +100,8 @@ server.serve_forever()
 from livereload import Server
 
 server = Server()
-make_rendered()
-server.watch('template.html', make_rendered)
+make_render()
+server.watch('template.html', make_render)
 server.serve(root='.')
 ```
 
@@ -160,7 +160,7 @@ app.config['JSON_AS_ASCII'] = False
 def index_page():
     return render_template('index.html', cards=cards)
 
-@app.route('/')
+@app.route('/api/')
 def api_page():
     data = {'name': 'Daniil'}
     return jsonify(data)
@@ -171,7 +171,8 @@ if __name__ == '__main__':
 
 
 ### Логирование
-\— ведение записей по важным для системы событиям.
+
+\- ведение записей по важным для системы событиям.
 
 ```python
 import logging
@@ -318,7 +319,7 @@ def staticdir(path):
 \- самостоятельный модуль Flask-приложения.
 
 ```
-main\
+main/
 - __init__.py
 - views.py
 - templates/
@@ -347,7 +348,7 @@ if __name__ == '__main__':
     app.run()
 ```
 
-Можно подключать отдельную статику:
+Можно подключать отдельную статику:\
 Можно делегировать блюпринту все адреса начинающиеся на определенный префикс:
 ```python
 # profile/views.py
@@ -393,7 +394,7 @@ APP_CONFIG=development
 # config.py
 
 DEBUG = True
-FLASK_ENV: 'development'
+FLASK_ENV = 'development'
 SECRET_KEY = 'secret'
 TESTING = True
 
@@ -466,7 +467,6 @@ README.md
 
 ```python
 # modules/blueprint_1/views.ру
-
 from flask import Blueprint, rendertemplate
 from .dao.candidates_dao import CandidatesDAO  # modules.blueprint_1.dao.candidate_dao
 
