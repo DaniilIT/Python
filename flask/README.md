@@ -5,7 +5,7 @@
 <img src="images/flask.webp" alt="logo flask" title="Logo flask" style="height: 380px;" />
 
 *Модуль* - это файл, который содержит исполняемый код на python.\
-*Пакет* - набор модулей, папка. Он должен содержать файл init.py в качестве флага.\
+*Пакет* - набор модулей, папка, которая содержит файл init.py в качестве флага.\
 *Библиотека* - набор пакетов.\
 **Фреймворк** - набор готовых компонентов (библиотек), из которых формируется приложение.
 
@@ -38,10 +38,6 @@ def index_page():  # названия функций должны быть ун�
 def show_post(post_id):
     return f'Post {post_id}'
 
-@app.route('/card/<path:subpath>')
-def show_card(subpath):
-    return f'Card {subpath}'
-
 if __name__ == '__main__':  # для команды flask не нужно
     app.run(debug==True)
 ```
@@ -54,17 +50,17 @@ if __name__ == '__main__':  # для команды flask не нужно
 
 ```
 python арр.ру
-flask run
-flask --debug run
-flask --app main run  # если не app.py
+flask run --debug
 ```
 
----
 
-Посмотреть запущенные процессы и отфильтровать: `ps aux | grep python`\
-**PID** (Process IDentifier) - уникальный номер процесса.
+## PID
 
-(List Of Opened Files) Понять, свободен ли порт, который нас интересует: `lsof -i -P | grep :5000`
+**Process IDentifier** - уникальный номер процесса.
+
+Посмотреть запущенные процессы и отфильтровать: `ps aux | grep python`
+
+Посмотреть, свободен ли определенный порт: (List Of Opened Files) `lsof -i -P | grep :5000`
 ```
 >> Python 12058 daniil 4u IPv4 0xadf36d703ab2444f 0t0 TCP localhost:5000 (LISTEN)
 ```
@@ -89,47 +85,53 @@ template = env.get_template('template.html')  # найти html-шаблон
 
 rendered_page = template.render(cards=cards, name='Daniil')
 
-with open('index.html', 'w', encoding='utf8') as file:
+with open('./index.html', 'w', encoding='utf8') as file:
     file.write(rendered_page)
 ```
 
-реализация HTTP-сервера.
+реализация HTTP-сервера:
 ```python
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
 server.serve_forever()
 ```
+```python
+from livereload import Server
+
+server = Server()
+make_rendered()
+server.watch('template.html', make_rendered)
+server.serve(root='.')
+```
 
 **DOM-дерево** - иерархическое представление структуры html.
 
-template
+template:
 ```html
 <!-- {% for index in range(6) %} -->
 {% for category, drink in drinks.items() %}
     <p>{{ category }}</p>
-    <p>{{ drink['label'] }}</p>
-    {% if drink.label %}
-    {% else %}
-    {% endif %}
+    {% if drink.label %}{% else %}{% endif %}
 {% endif %}
 ```
 
 [django](https://docs.djangoproject.com/en/dev/ref/templates/builtins/)
 ```html
 {% load static %}  <!-- settings.py `STATIC_URL ='/static/'` -->
-<img src="{% static 'images/hi.jpg' %}" />
+<img src="{% static 'images/img.jpg' %}" />
 
-<!-- urls.py `path('', views.index, name='index')` -->
-{% url 'index' slug='газонокосилка' %}
+<!-- #urls.py `path('', views.index, name='index')` -->
+{% url 'index' slug='товар_1' %}
 
 <!-- шаблонные фильтры -->
 {{ list|length }}  <!-- подсчет длины -->
+{{ text|truncate(22) }}  <!-- обрезка текста -->
 {{ text|truncatechars:7 }}  <!-- обрезка текста -->
 {{ html_text|safe }}  <!-- отключить экранирование -->
 ```
 
-базовый шаблон
+базовый шаблон:
 ```html
 <body>
         {% block content %}
@@ -144,12 +146,15 @@ template
 
 ***
 
-**SPA** (Single Page Application) - сервер отдает JSON и шаблон, а шаблонизация происходит на стороне клиента.
+
+### SPA
+**Single Page Application** - сервер, который отдает JSON и шаблон, а шаблонизация происходит на стороне клиента.
 
 ```python
 from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 
 @app.route('/')
 def index_page():
@@ -164,7 +169,9 @@ if __name__ == '__main__':
     app.run()
 ```
 
-Логирование — ведение записей по важным для системы событиям.
+
+### Логирование
+\— ведение записей по важным для системы событиям.
 
 ```python
 import logging
@@ -185,16 +192,17 @@ DEBUG:root:Главная страница запрошена
 INFO:werkzeug:127.0.0.1 - - [18/Feb/2023 16:04:37] "GET / HTTP/1.1" 200 -
 ```
 
-### обработка query параметров
 
-\- данные, которые передаются в GET-запросе в формате ключ-значение, например:
+### Обработка GET запросов
+
+**query параметры** - данные, которые передаются в GET-запросе в формате ключ-значение, например:\
 `https://translate.google.ru/?sl=ru&tl=en&op=translate`
 
 ```html
 <h2>форма поиска</h2>
 <form action='/search'>
-    <input type='text' name='s'>
-    <input type='submit' value='Найти'>
+    <input type='text' name='s' />
+    <input type='submit' value='Найти' />
 </form>
 ```
 
@@ -210,15 +218,15 @@ def search_page():
 ```
 
 
-### обработка POST запросов
+### Oбработка POST запросов
 
-адресная строка имеет ограничения, а данные можно передавать в теле запроса.
+Адресная строка имеет ограничения, а данные можно передавать в теле запроса.
 
 ```html
 <h2>форма</h2>
 <form action='/add' method='post'>
-    <input type='text' name='text'>
-    <input type='submit' value='Добавить'>
+    <input type='text' name='text' />
+    <input type='submit' value='Добавить' />
 </form>
 ```
 
@@ -234,7 +242,7 @@ def add_page():
 
 @app.route('/add/', methods=['GET', 'POST'])
 def add_page():
-    s = request.values.get('s') # values = args + folder
+    s = request.values.get('s') # values = args + form
     text = request.values.get('text')
     return f'<p>Hello, {s or text}!</p>'
 ```
@@ -251,14 +259,14 @@ def add_page():
 ```
 
 ```python
-from flask import Flask, request
+from flask import Flask, request, redirect
 
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'webp', 'png', 'jpg', 'jpeg', 'gif'}
 
 def is_filename_allowed(filename):
-    """ Проверяет, что расширение файла в белом списке.
+    """ Проверяет, что расширение файла соответствует изображению
     """
-    extension = filename.split('.')[-1]
+    extension = filename.split('.')[-1]  # Path(filename).suffix
     if extension in ALLOWED_EXTENSIONS:
         return True
     return False
@@ -286,13 +294,14 @@ def upload_page():
             return '<p>Картинка сохранена</p>'
         else:
             extension = filename.split('.')[-1]
-            return '<p>Файлы с расширением {extension} не поддерживаются</p>'
-    return '<p>Файл не был отправлен</p>'
+            return redirect('/error/extension', 302)
+    return redirect('/error/upload', 302)
 ```
 
----
+***
 
-**static/** - единственная папка, доступная пользователям.
+
+**static** - единственная папка, доступная пользователям.
 
 Чтобы сделать содержимое другой папки доступным, нужно использовать специальную вьюшку:
 ```python
@@ -306,7 +315,14 @@ def staticdir(path):
 
 ## Blueprint
 
-\- самостоятельный пакет Flask-приложения.
+\- самостоятельный модуль Flask-приложения.
+
+```
+main\
+- __init__.py
+- views.py
+- templates/
+```
 
 ```python
 # main/views.py
@@ -314,7 +330,7 @@ from flask import Blueprint, render_template
 
 main_blueprint = Blueprint('main', __name__, template_folder='templates')
 
-@profile_blueprint.route('/')
+@main_blueprint.route('/')
 def index_page():
     return render_template('index.html')
 ```
@@ -322,7 +338,6 @@ def index_page():
 ```python
 # app.py
 from flask import Flask
-
 from main.views import main_blueprint
 
 app = Flask(__name__)
@@ -332,48 +347,17 @@ if __name__ == '__main__':
     app.run()
 ```
 
-```
-profile\
-- __init__.py
-- views.py
-- templates/
-```
-
-```python
-from flask import Blueprint, render_template
-
-profile_blueprint = Blueprint('profile', __name__, static_folder='static', template_folder='templates')
-
-@profile_blueprint.route('/profile/')
-def profile_page():
-    return render_template('profile_index.html')
-
-@profile_blueprint.route('/profile/<int:user_id>')
-def profile_page(int user_id):
-    return f'<p>Hello, {user_id}!</p>'
-```
-
-```python
-# app.py
-from flask import Flask
-
-from profile.views import profile_blueprint
-
-app = Flask(__name__)
-app.register_blueprint(profile_blueprint)
-
-if __name__ == '__main__':
-    app.run()
-```
-
+Можно подключать отдельную статику:
 Можно делегировать блюпринту все адреса начинающиеся на определенный префикс:
-
 ```python
-# app.py
-app.register_blueprint(profile_blueprint, url_prefix='/profile/') # ! мб без '/' в конце
-
 # profile/views.py
+
+profile_blueprint = Blueprint('profile', __name__, static_folder='static', template_folder='templates', url_prefix='/profile/')
+
+# /profile/
 @profile_blueprint.route('/')
+def profile_page:
+    return '<p>Hello, Profile!</p>'
 ```
 
 
@@ -381,8 +365,9 @@ app.register_blueprint(profile_blueprint, url_prefix='/profile/') # ! мб бе�
 
 ```python
 from flask import Flask
+from pprint import pprint
 app = Flask(__name__)
-print(app.config)
+pprint(dict(app.config))
 ```
 
 ```
@@ -398,31 +383,6 @@ print(app.config)
 }
 ```
 
-```python
-# config.py
-
-DEBUG = True
-FLASK_ENV: 'development'
-SECRET_KEY = 'secret'
-TESTING = True
-```
-
-```python
-from flask import Flask
-
-app = Flask(__name__)
-app.config.from_pyfile('config.py')
-# print(app.config.get('PATH'))
-
-@app.route('/')
-def index_page():
-    return '<p>Hello, World!</p>'
-
-if __name__ == '__main__':
-    app.run()
-```
-
----
 ```
 # .env
 APP_CONFIG=development
@@ -432,7 +392,14 @@ APP_CONFIG=development
 ```python
 # config.py
 
-class Config:
+DEBUG = True
+FLASK_ENV: 'development'
+SECRET_KEY = 'secret'
+TESTING = True
+
+# или
+
+class Config_1:
     DEBUG = True
     STATIC_FOLDER = 'static'
     TEMPLATES_FOLDER = 'templates'
@@ -441,85 +408,73 @@ class Config:
 
 ```python
 from flask import Flask
-from config import Config
+from config import Config_1
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_pyfile('config.py')
+# или
+app.config.from_object(Config_1)
 # print(app.config.get('PATH'))
-
-@app.route('/')
-def index_page():
-    return '<p>Hello, World!</p>'
-
-if __name__ == '__main__':
-    app.run()
 ```
+
 
 ## Типичное файловое дерево FLASK
 
 ```
-# арр (папка с блюпринтами)
+# modules/ (папка с блюпринтами)
 
-- main
+- main/
 - - __init__.py
-- - templates
+- - templates/
 - - views.ру
-- - tests
 
-- blueprint_1
+- blueprint_1/
 - - __init__.py
-- - dao
-- - templates
-- - static
+- - dao/
+- - templates/
+- - static/
 - - views.ру
-- - tests
 
-- blueprint_2
+
+data/
+- data.json
+
+- static/
+- - styles/
+- - scripts/
+- - images/
+
+- uploads/
+
+- tests/
 - - __init__.py
-- - dao
-- - templates
-- - static
-- - views.ру
-- - tests
-
-data
-- candidates.json
-- vacancies.json
-
-- static
-
-- tests
 - - conftest.py
-- - blueprint_1
-- - blueprint_2
+- - main_test.py
+- - main_dao_test.py
+- - blueprint_1_test.py
+- - blueprint_1_dao_test.py
 
 config.py (DevelopmenConfig, ProductionConfig)
-
-requirements.txt
-
 app.py
-
+requirements.txt
 .env
-
 .gitignore
-
 README.md
 ```
 
+### views with DAO
+
 ```python
-# candidates/views.ру
+# modules/blueprint_1/views.ру
 
 from flask import Blueprint, rendertemplate
-from .dao.candidate_dao import CandidateDAO
+from .dao.candidates_dao import CandidatesDAO  # modules.blueprint_1.dao.candidate_dao
+
 
 candidates_blueprint = Blueprint('candidates_blueprint', __name__, template_folder='templates')
 
-candidates dao = CandidateDAO('./data/candidates.json')
+candidates_dao = CandidatesDAO('./data/candidates.json')
 
-@candidates_blueprint.route('/candidates/')
-def candidates_all_page():
-    candidates = candidates_dao.get_all()
-    return render_template('candidates_index.html', candidates=candidates)
 
 # Вьюшка для одного кандидата
 @candidates_blueprint.route('/candidates/<int:pk>/')
@@ -527,10 +482,3 @@ def candidate_page(pk):
     candidate = candidates_dao.get_by_id(pk)
     return render_template('candidates_single.html', candidate=candidate)
 ```
-
-
-            
-
-
-
-

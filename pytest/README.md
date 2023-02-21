@@ -6,13 +6,19 @@
 
 Exceptions (исключения) - ошибки, возникающие в ходе выполнения программы.
 
-[BaseException]
-$$ \Downarrow $$
-[Exception][SystemExit][KeyboardInterrupt]
-$$ \Downarrow $$
-[SyntaxError][NameError][ValueError][TypeError][ZeroDivisionError][IndexError][КеуЕггог]...
+<div align="center"> [BaseException] </div>
 
-Обработчик ошибок
+$$\Downarrow$$
+
+<div align="center"> [Exception] &emsp; [SystemExit] &emsp; [KeyboardInterrupt] </div>
+
+$$\Downarrow$$
+
+<div align="center"> SyntaxError &ensp; NameError &ensp; ValueError &ensp; TypeError &ensp; ZeroDivisionError &ensp; IndexError &ensp; КеуЕггог... </div>
+
+
+## Обработчик ошибок:
+
 ```python
 class MyException(Exception):
     # pass
@@ -53,15 +59,17 @@ assert 2 + 2 == 4, 'count is wrong'
 OPTIMIZE - отключает проверку условий assert
 python -O main.py
 ```
+
 ***
 
 ```
 pip install pytest
 ```
 
-1. pytest собирает по всему дереву проекта файлы, функции и классы похожие на тесты.
-2. ищет файлы, которые начинаются на `test_` или заканчиваются на `_test.py`.
-3. выполняет все asserts, а не останавливается на первом
+* pytest собирает по всему дереву проекта файлы, функции и классы похожие на тесты:\
+    ищет файлы, которые начинаются на `test_` или заканчиваются на `_test.py`;
+* выполняет функции и методы с префиксом `test`, классы с префиксом `Test` без конструктора `__init__`;
+* выполняет все asserts, а не останавливается на первом;
 
 ```python
 # utils_test.ру
@@ -80,10 +88,15 @@ def test_my_function_3():
 
 ```
 pytest
+# или (можно без tests/__init__.py)
+python -m pytest
 ```
 
-Параметризация
+
+## Параметризация
+
 ```python
+# utils_test.ру
 import pytest
 from utils import my_function
 
@@ -94,7 +107,8 @@ def test_my_function(first, second, expected):
     assert my_function(first, second) == expected, f'my_function is wrong for {first} and {second}'
 ```
 
-Используем класс
+Используем класс:
+
 ```python
 # utils_test.ру
 import pytest
@@ -108,9 +122,9 @@ class TestMyFunction:
         assert my_function(first, second) == expected, f'my_function is wrong for {first} and {second}'
 ```
 
----
 
-Тестируем типы исключений
+## Тестируем типы исключений
+
 ```python
 # utils.ру
 import math
@@ -130,17 +144,17 @@ from utils import get_circle_square
 
 get_circle_square_exceptions = [('', TypeError), (-1, ValueError)]
 
-@pytest.mark.parametrize('radius, exception', get_circle_square_exceptions)
-def test_type_error_get_circle_square(radius, exception):
-    with pytest.raises(exception):
-        get_circle_square(radius)
+class TestGetCircleSquare:
+    @pytest.mark.parametrize('radius, exception', get_circle_square_exceptions)
+    def test_type_error_get_circle_square(self, radius, exception):
+        with pytest.raises(exception):
+            get_circle_square(radius)
 ```
 
----
+## Тестируем класс
 
-Тестируем класс
 ```python
-# dao.ру
+# utils.ру
 import math
 
 class Circle:
@@ -152,27 +166,28 @@ class Circle:
         self.radius = radius
     
     def get_perimeter(self):
-        return math.pi * radius ** 2
+        return math.pi * self.radius ** 2
 ```
 
 ```python
-# dao_test.ру
+# utils_test.ру
 import pytest
-from dao import Circle
-
-# circle_parameters = [(1, 2), (1, 6.28), (1, -1, 0)]
+from utils import Circle
 
 class TestCircle:
     def test_get_perimeter(self):
         circle = Circle(1)
-        assert round(circle.get_perimeter(), 2) == 6.28, 'Circle is wrong on get_perimeter for radius=1'
+        assert round(circle.get_perimeter(), 2) == 6.28
         
     def test_type_error_init(self):
         with pytest.raises(TypeError):
-            get_circle_square('1')
+            Circle('1')
 ```
 
-**Фикстурa** - функция, которая выполняется до тестирования для подготовки данных. 
+
+## Фикстурa
+
+\- функция, которая выполняется до тестирования для подготовки данных. 
 
 ```python
 # conftest.ру
@@ -188,19 +203,18 @@ def some_test_data():
 import pytest
 from utils import my_function
 
-
 class TestMyFunction:
     def test_my_function(self, some_test_data):
-        assert my_function(some_test_data[0]) == some_test_data[1], f'my_function is wrong for {some_test_data[0]}'
+        assert my_function(some_test_data[0]) == some_test_data[1]
 ```
 
 
-## DAO (Data Access Object)
+## DAO
 
-\- объект для доступа к данным из файлов, базы данных или сторонних сервисов.
+**Data Access Object** - объект для доступа к данным из файлов, базы данных или сторонних сервисов.
 
 ```python
-# candidate.ру
+# dao/candidate.ру
 
 class Candidate:
     def __init__(self, candidate_id, name, position, skills):
@@ -214,9 +228,9 @@ class Candidate:
 ```
 
 ```python
-# candidates_dao.ру
+# dao/candidates_dao.ру
 import json
-from candidate import Candidate
+from .candidate import Candidate
 
 class CandidatesDAO:
     def __init__(self, path):
@@ -265,42 +279,20 @@ class CandidatesDAO:
                 return candidate
 ```
 
-```python
-# app.py
-from candidates_dao import CandidatesDAO
 
-candidates_dao = CandidatesDAO()
-
-@app.route('/')
-def index_page():
-    candidates = candidates_dao.get_all()
-    return render_template('index.html', candidates=candidates)
-
-@app.route('/skill/<skill>')
-def skill_page(skill_name):
-    candidates = candidates_dao.get_by_skill(skill)
-    return render_template('skill.html', candidates=candidates)
-
-@app.route('/candidate/<int:uid>')
-def skill_page(uid):
-    candidate = candidates_dao.get_by_id(uid)
-    return render_template('candidate.html', candidate=candidate)
-```
-
-## для FLASK
+## FLASK
 
 ```python
 #conftest.py
-
 import pytest
-import app
+from app import app
 
 @pytest.fixture()
 def test_client():
-    app = app.app
-    return app.test_client()  # сервер не поднимает, но запросы выполняет
+    return app.test_client()  # сервер не поднимается, но на запросы отвечает
 ```
 
+Тест views:
 ```python
 #main_test.py
 import pytest
@@ -334,6 +326,7 @@ class TestMain:
 
 ```
 
+Тест DAO:
 ```python
 # candidates_dao_test.py
 import pytest
@@ -372,18 +365,3 @@ class TestCandidateDAO:
         response = test_client.get('/', follow_redirects=True)
         assert 'Это главная страничка' in response.data.decode('utf-8'), 'Контент не верный'
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

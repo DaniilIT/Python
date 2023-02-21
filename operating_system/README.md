@@ -242,7 +242,7 @@ with open(json_path, 'w') as json_file:
     json.dump(json_dict, json_file, indent=2, ensure_ascii=False)
     
 try:
-    with open(json_path, 'r') as json_file:
+    with open(json_path, 'r', encoding='utf-8') as json_file:
         json_dict = json.load(json_file)
 except FileNotFoundError:
     pass
