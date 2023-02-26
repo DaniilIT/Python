@@ -191,9 +191,9 @@ print(args.page)
 
 **Переменные окружения** — это набор пар ключ-значение для пользовательской среды.
 
-'''
+```
 pip install python-dotenv
-'''
+```
 
 ```python
 TOKEN=secret

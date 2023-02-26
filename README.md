@@ -81,7 +81,7 @@ print(s.find('a'))  # 0  # rfind - с конца
 print(s.replace('a', 'c'))  # cb-cbA
 ```
 
-> `&#x1f352;]` [&#x1f352;](https://unicode-table.com/ru/)
+> `&#x1f352;` [&#x1f352;](https://unicode-table.com/ru/)
 
 ```python
 cherries_name = print('🍒'.encode('ascii', 'namereplace'))  # b'\\N{CHERRIES}'

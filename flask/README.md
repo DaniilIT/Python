@@ -29,6 +29,7 @@ from flask import Flask
 
 app = Flask(__name__)  # указать, где искать ресурсы
 
+
 @app.route('/')  # маршрутизация - связь функции с URL-адресом
 def index_page():  # названия функций должны быть уникальными
     return '<p>Hello, World!</p>'  # возвращает только строку html
@@ -39,7 +40,7 @@ def show_post(post_id):
     return f'Post {post_id}'
 
 if __name__ == '__main__':  # для команды flask не нужно
-    app.run(debug==True)
+    app.run(debug=True)
 ```
 
 Если не ставить в конце маршрута '/', будут обрабатываться только адреса без '/'.\
@@ -155,6 +156,7 @@ from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
+app.config['DEBUG'] = True
 
 @app.route('/')
 def index_page():
@@ -243,6 +245,7 @@ def add_page():
 
 @app.route('/add/', methods=['GET', 'POST'])
 def add_page():
+    # if request.method == 'GET':
     s = request.values.get('s') # values = args + form
     text = request.values.get('text')
     return f'<p>Hello, {s or text}!</p>'
