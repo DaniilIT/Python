@@ -1,25 +1,26 @@
 # SQL
 
-**Structured Query Language** - язык запросов, предназначенный для создания, обработки и хранения баз данных (DB), и представляет собой простую линейную последовательность операторов.
+**Structured Query Language** - язык запросов, предназначенный для создания, обработки и хранения баз данных (DB), представляет собой простую линейную последовательность операторов.
 
 [вопросы на собеседовании](https://tproger.ru/articles/sql-interview-questions/)\
 [графический дизайн архитектур DB](https://app.dbdesigner.net/designer)\
 [codecademy](https://www.codecademy.com/learn/learn-sql)\
-[MySQL](https://proglib.io/p/mysql-queries)
-[группы операций](https://sky.pro/media/gruppy-operatorov-sql/)
+[MySQL](https://proglib.io/p/mysql-queries)\
+[группы операций](https://sky.pro/media/gruppy-operatorov-sql/)\
+[подзапросы](https://sky.pro/media/sql-podzaprosy-rukovodstvo-po-ispolzovaniyu/)
 
 
 ## База данных
 
 \- упорядоченная структура хранения иформации преимущественно больших объемов.
 
-- **реляционные** (от слова "отношение") данные хранятся в виде связных таблиц.
-- **нереляционные** данные хранятся иначе, например в виде хэш-таблиц, дерева и т. д.
+- **реляционные** (от слова "отношение") данные хранятся в виде связных таблиц
+- **нереляционные** данные хранятся иначе, например в виде хэш-таблиц, дерева, графов и т. д.
 
 
 ### СУБД
 
-**Система Управления Базы Данных** - ПО, которое обрабатывает SQL опросы на получение, изменение и удаление информации из DB.
+**Система Управления Базы Данных** - ПО, которое обрабатывает SQL-запросы на получение, изменение и удаление информации из DB.
 
 **DB** $\Leftrightarrow$ **СУБД** $\Leftrightarrow$ **SQL-запросы**
 
@@ -41,7 +42,7 @@
 
 <img src="images/SQLite.svg" alt="SQLite logo" title="SQLite logo" style="height: 380px;"/>
 
-\- легковесная реляционная СУБД для создания локальных баз данных, встраиваемых в приложения или веб-сайты на уровне сервера без клиент-серверной архитектуры и состоящаяиз одного файла с раширением `.db`.
+\- легковесная реляционная СУБД для создания локальных баз данных, встраиваемых в приложения или веб-сайты на уровне сервера без клиент-серверной архитектуры и состоящая из одного файла с раширением `.db`.
 
 ```python
 import sqlite3
@@ -86,9 +87,15 @@ with sqlite3.connect('dbname.db') as con:
         print(row)
 ```
 
-выбрать некоторые поля
+выбрать определенные поля:
 ```sql
 SELECT col1, col2
+FROM tname
+```
+
+выбрать уникальные значения:
+```sql
+SELECT DISTINCT col1
 FROM tname
 ```
 
@@ -148,11 +155,11 @@ GROUP BY col1, col2
 вычисляют обобщенное значений чаще всего по группам.
 
 * COUNT(col) - считает кольчество **не null** строк в поле;
-* SUM() - суммирует значения числового поля;
-* AVG() - считает среднее (average) арифметическое числового поля;
-* MIN() / MAX() - находят минимальное и максимальное значение поля;
+* SUM(col) - суммирует значения числового поля;
+* AVG(col) - считает среднее (average) арифметическое числового поля;
+* MIN(col) / MAX(col) - находят минимальное и максимальное значение поля;
 
-посчитать количество строк в таблице
+посчитать количество строк в таблице:
 ```sql
 SELECT COUNT(*)
 FROM tname
@@ -167,7 +174,7 @@ GROUP BY col1
 
 ### Алиасы
 
-\- названия новых полей после группировки и применения агрегирующих функций
+\- псевдонимы, названия новых полей после группировки и применения агрегирующих функций
 
 ```sql
 SELECT col1, SUM(col2) as col2_sum, MAX(col2) as col2_max
@@ -205,11 +212,28 @@ con = sqlite3.connect('dbname')
 ## Управление таблицей
 
 
+### Импортирование таблицы
+
+```python
+import sqlite3
+import pandas as pd
+from datetime import date
+
+df = pd.DataFrame([
+    ['ABCD', 4, True, date(2023, 2, 26)],
+    ['BCAD', 2, False, date(2023, 2, 27)],
+    ], columns=['title', 'num', 'bool', 'date'], index=range(2))
+
+with sqlite3.connect('dbname.db') as con:
+	df.to_sql('tname', con)
+```
+
+
 ### Создание таблицы
 
 При создании таблицы определяется тип столбцов:
 * BIT - 0 / 1;
-* INT - числовые значени (4байта) $\pm$2 млрд;
+* INTEGER - числовые значени (4байта) $\pm$2 млрд;
 * DECIMAL - числовые значени с фиксированной точностью (для денежных значений);
 * FLOAT - числовые значени с плавающей точкой;
 * VARCHAR(n) - текст в кодировке ASCII в 1 байт для латиницы, max 8000 (еще есть TEXT без указания длины);
@@ -228,79 +252,69 @@ CREATE TABLE tname (
 )
 ```
 
-```python
-from datetime import datetime
-
-date_string = '2023-02-26 15:34:55.123'
-date_time = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
-
-# Добавление даты в SQLite
-cursor.execute("""
-	INSERT INTO tname
-	(col_date) VALUES (?)
-""", (date_time,))
-```
-
-
-При создании таблицы рекомендуется указывать ограничения для заполнения данными с помощью модификаторов:
-
+При создании таблицы рекомендуется указывать ограничения (CONSTRAINT):
 ```sql
-CREATE TABLE tname (
+CREATE TABLE IF NOT EXISTS tname (
     col1 INT UNIQUE,
     col2 VARCHAR(40) NOT NULL,
-    col3 DATE CONSTRAINT CK_col3 CHECK (col3 >= '1996-01-01'),
-    col4 FLOAT CONSTRAINT DF_col4 DEFAULT 'Undefined'
+    col3 DATE CONSTRAINT ck_col3 CHECK (col3 >= '1996-01-01'),
+    col4 FLOAT CONSTRAINT df_col4 DEFAULT 'Undefined'
 )
 ```
 
 
 ### Индекс
 
-\- позволяет ускорить выполнение поиска данных, так как он предварительно отсортирован по значению, но требует выделения памяти.
-
-при создании
-INDEX idx_name_age (name, age)
-
-как отдельный запрос
-CREATE INDEX index_name ON tname (name, age);
+\- позволяет ускорить выполнение поиска данных, так как он предварительно <u>отсортирован</u> по значению, но требует выделения памяти.
 
 ```sql
 CREATE [UNIQUE] INDEX index_name
 ON tname (col1);
 ```
 
-удаление индекса
-```sql
-DROP INDEX index_name;
-```
+удаление индекса: DROP INDEX
+
 
 ### PRIMARY KEY
 
-**Первичный ключ** - столбец, который уникально идетифицирует строку в таблице и предназначен для связи между таблицами.
+**Первичный ключ** - столбец, который <u>уникально</u> идетифицирует строку в таблице, автоматически становится индексом и предназначен для связи между таблицами.
 
-составной первичный ключ для связи many to many
+```sql
+CREATE TABLE tname (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+	...
+)
+```
 
-
-Id INT PRIMARY KEY AUTO_INCREMENT
+составной первичный ключ для вспомогательной таблицы связи many to many:
+```sql
+CREATE TABLE tname (
+	tname1_id INTEGER,
+	tname2_id INTEGER,
+    PRIMARY KEY (tname1_id, tname2_id)
+)
+```
 
 
 ### изменение таблицы
 
 &#10158; **ALTER TABLE tname**\
+Вид операции:\
 &#10158; ADD col type\
 &#10158; RENAME col TO col_new\
-&#10158; DROP COLUMN col  # в sqlite не поддерживает динамическое изменение колонок
+&#10158; DROP COLUMN col  # sqlite не поддерживает динамическое изменение колонок
 
 ```sql
 ALTER TABLE tname
-ADD col4 INT
+ADD col4 INTEGER
 ```
 
 ### удаление таблицы
 
-&#10158; **TRUNCATE TABLE tname** - удаление всех данных таблицы
+&#10158; **TRUNCATE TABLE tname** - удаление всех данных таблицы\
 &#10158; **DROP TABLE tname** - удаление таблицы
 
+***
 
 ## Управление данными
 
@@ -311,16 +325,30 @@ ADD col4 INT
 
 ```sql
 INSERT INTO tname
-VALUES (val1, val2, ...)
+VALUES (val1, val2, ...), (val1, val2, ...);
 ```
 
-вставить данные из другой таблицы
+вставить данные из другой таблицы:
 ```sql
 INSERT INTO tname_2
 SELECT *
 FROM tname_1
 WHERE condition
 ```
+
+вставить дату:
+```python
+from datetime import datetime
+
+date_string = '2023-02-26 15:34:55.123'
+date_time = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f')
+
+cursor.execute("""
+	INSERT INTO tname
+	(col_date) VALUES (?)
+""", (date_time,))
+```
+
 
 ### Изменение данных
 
@@ -332,16 +360,24 @@ SET col1 = 'val1_new'
 WHERE col2 > 10;
 ```
 
+```sql
+UPDATE tname
+SET col1 = col1 * 0.85
+WHERE col1 IS NOT NULL;
+```
+
+
 ### Удаление данных
 
 &#10158; **DELETE FROM tname**
 
-удалить строку с индексом равным 1
+удалить строку с индексом равным 1:
 ```sql
 DELETE FROM tname
 WHERE Id = 1;
 ```
 
+***
 
 ## Связь таблиц
 
@@ -361,47 +397,89 @@ WHERE Id = 1;
 
 **Внешний ключ** - столбец, который соответствует первичному ключу в другой таблице (обычно устанавливается в подчиненной), он позволяет:
 * связывать таблицы между собой;
-* указать поведение при удалении или изменении строки в главной таблице;
-
-модификаторы:
-* ON DELETE - указание действий при удалении строки в главной таблице
-* ON UPDATE - указание действий при изменении строки в главной таблице
-
-опции:
-* CASCADE - автоматичически удаляет/изменяет строки в зависимой таблице
-* SET NULL - устанавливает значение NULL для столбца внешнего ключа в зависимой таблице
-* SET DEFAULT - устанавливает значение из CONSTRAINT DEFAULT для столбца внешнего ключа в зависимой таблице
-* RESTRICT - запрещает удаление/изменение строк в главное таблице, если есть связные строки
+* указать поведение при удалении или изменении строки в главной таблице, то есть гарантирует целостное обновдение данных;
 
 ```sql
-CREATE TABLE tname_2 (
-    Id INT PRIMARY KEY,
-    Title VARCHAR(40),
-    tname_1_Id,
-    FOREIGN KEY (tname_1_Id) REFERENCES tname_1 (Id) ON DELETE CASCADE
+CREATE TABLE tname2 (
+    tname1_id INTEGER FOREIGN KEY REFERENCES tname1(id),  -- такой синтаксис не работает в sqlite3
+	...
 )
+```
+
+модификаторы:
+* ON DELETE - указание действий при удалении строки в главной таблице;
+* ON UPDATE - указание действий при изменении строки в главной таблице;
+
+опции:
+* CASCADE - автоматичически удаляет/изменяет строки в зависимой таблице;
+* SET NULL - устанавливает значение NULL для столбца внешнего ключа в зависимой таблице;
+* SET DEFAULT - устанавливает значение из CONSTRAINT DEFAULT для столбца внешнего ключа в зависимой таблице;
+* RESTRICT - запрещает удаление/изменение строк в главное таблице, если есть связные строки;
+* NO ACTION - ничего не делать, но это сломает целостность;
+
+```sql
+CREATE TABLE tname2 (
+	tname1_Id INTEGER,
+    FOREIGN KEY (tname1_Id) REFERENCES tname1(Id) ON DELETE SET NULL ON UPDATE CASCADE
+)
+```
+
+
+### реализация связей между таблицами
+
+<img src="images/relationship.png" alt="relationship" title="relationship" style="height: 380px;"/>
+
+```sql
+CREATE TABLE genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE films (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(40) NOT NULL,
+    genre_id INTEGER,
+    FOREIGN KEY (genre_id ) REFERENCES genres(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE actors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE film_actor (
+    film_id INTEGER,
+    actor_id INTEGER,
+    PRIMARY KEY (film_id, actor_id),
+    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
 ```
 
 
 ## Объединение таблиц
 
-1) INNER JOIN - пересечение двух таблиц
-2) LEFT JOIN - все значения из первой таблицы и их пересечения со второй
+1) INNER JOIN - пересечение двух таблиц (выведет только те строчки, которые есть в обеих таблицах по связи)
+2) LEFT JOIN - все значения из первой таблицы и пересечения со второй
 3) RIGHT JOIN - все значения из второй таблицы и их пересечения со первной (= LEFT JOIN у второй таблицы)
 4) OUTER JOIN - full
 
 ```sql
-SELECT tname_1.col1 as t1_col1, tname_2.col1 as t2_col1
-FROM tname_1
-INNER JOIN tname_2
-ON tname_1.id = tname_2.id
+SELECT films.name as film, genres.name as genre, actors.name as actor
+FROM films
+INNER JOIN genres ON films.genre_id = genres.id
+INNER JOIN film_actor ON films.id = film_actor.film_id
+LEFT JOIN actors ON film_actor.actor_id = actors.id
 ```
+
+&#10158; UNION [ALL] -- объединение таблиц горизонтально [без удаления повторений]
 
 ## Нормальная форма
 
-\- требования, которые должна выполнять DB, чтобы свести к минимому ошибки в результате выборки или изменения данных.
+\- требования, которые должна выполнять DB, чтобы свести к минимому ошибки в результате выборки или изменения данных.\
+Может проводиться в 3 или 6 операций.
 
-1) Не должно быть наборов значений в одной строке (перечисления через ',' должны быть преобразованы в несколько строк)
+
+1) Не должно быть наборов значений в одном поле (перечисления через ',' должны быть преобразованы в несколько таблиц)
 2) Все атрибуты должны зависеть от заголовка (одна таблица - один обьект)
-3) Не должно быть повторяющихся значений, применимых к нескольким записям.
-
+3) Не должно быть повторяющихся значений, дубликаты выносим в отдельные таблицы-справочники
