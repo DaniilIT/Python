@@ -45,7 +45,7 @@ mssql+pyodbc://root:***@localhost/dbname
 
 | **SQL** | **SQLAlchemy** |
 | :---: | :---: |
-| BOOLEAN I Boolean |
+| BOOLEAN | Boolean |
 | INTEGER | Integer |
 | NUMERIC | Numeric |
 | FLOAT | Float |
@@ -150,7 +150,7 @@ with app.app_context():
     db.session.commit()
     
 with app.app_context():
-    user_with_group = User,query.get(1)
+    user_with_group = User.query.get(1)
     print(user_wuth_group.group.name)
 ```
 
@@ -348,7 +348,7 @@ with db.session.begin():
 
 ## Миграция
 
-\- процесс изменения структуры DB.\
+\- процесс изменения структуры DB. (~ ALTER TABLE)\
 \- файл со списком запросов для обновления DB.
 
 **Flask-Migrate** $\leftarrow$ **Alembic**
@@ -358,6 +358,9 @@ pip install Flask-Migrate
 ```
 
 ```python
+from flask_migrate import Migrate
+
+#
 migrate = Migrate(app, db, render_as_batch=True)  # render_as_batch - настройка, чтобы sqlite3 мог удалять/добавлять колонки
 ```
 
