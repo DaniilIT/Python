@@ -417,7 +417,7 @@ from config import Config_1
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 # или
-app.config.from_object(Config_1)
+app.config.from_object(Config_1())
 # print(app.config.get('PATH'))
 ```
 
