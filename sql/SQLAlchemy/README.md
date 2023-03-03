@@ -7,7 +7,7 @@
 
 ## [SQLAlchemy](https://www.sqlalchemy.org/)
 
-<img src="images/sqlalchemy.png" alt="SQLAlchemy logo" title="SQLAlchemy logo" style="height: 200px;"/>
+<img src="images/sqlalchemy.png" alt="SQLAlchemy logo" title="SQLAlchemy logo" style="height: 160px;"/>
 
 ## [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/latest/)
 
