@@ -1,6 +1,6 @@
 ## [MatPlotLib](https://matplotlib.org/stable/index.html)
 
-\- библиотека для построения графиков.
+\- библиотека для построения [графиков](https://matplotlib.org/stable/plot_types/index.html).
 
 ```
 pip install matplotlib
