@@ -233,6 +233,10 @@ with open(file_path, 'r') as file:
 ```
 
 
+## Сериализация 
+
+\- процесс преобразования структуры данных в последовательность битов.
+
 ### json
 
 ```python
@@ -255,6 +259,46 @@ def upload_json(json_path):
 def download_json(json_path, json_content):
     with open(json_path, 'w') as json_file:
         json.dump(json_content, json_file, indent=2, ensure_ascii=False)
+```
+
+### [marshmallow](https://marshmallow.readthedocs.io/en/stable/index.html)
+
+\- независимая от ORM/ODM фреймворка библиотека для сериализации сложных структур.
+
+```
+pip install marshmallow
+```
+
+типы полей: Bool, Int, Decimal (число с фиксированной точностью), Float, DataTime, Str, Email и т. д.
+
+```python
+from marshmallow import Schema, fields
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    age = db.Column(db.Integer)
+
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str()
+    age = fields.Int()
+
+user1 = User(name="A", age=18)
+user2 = User(name="B", age=30)
+
+user_schema = UserSchema()
+user_dict = user_schema.dump(user1)
+user_json = user_schema.dumps(user1)
+
+users_schema = UserSchema(many=True)
+users_list = user_schema.dump([user1, user2])
+users_json = user_schema.dumps([user1, user2])
+
+s = '{"name": "C", "age": 26}'
+user_dict = user_schema.loads(s)
+user = User(**user_dict)
 ```
 
 
