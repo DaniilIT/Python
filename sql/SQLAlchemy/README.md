@@ -100,6 +100,8 @@ user1_json = json.dumps({
     'name': user.name,
 })
 user2 = User.query.get(2)  # primary key
+# user2 = User.query.filter(User.id == 2).first()  # тоже самое
+# user2 = User.query.filter(User.id == 2).one()  # вызовет except, если нет объекта
 ```
 
 
@@ -165,8 +167,10 @@ SELECT * FROM user WHERE age < 30
 ```python
 # query = db.session.query(User).filter(User.age < 30)
 query = User.query.filter(User.age < 30)
-user = query.one()  # вызовет исключение, если список пустой
-user_name = query.first().name
+# print(query)  # получить сырой текст запроса
+users = query.all()
+user1_name = query.one().name  # вызовет исключение, если список пустой
+user1_name = query.first().name
 ```
 
 ---

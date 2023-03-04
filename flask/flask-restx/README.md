@@ -15,7 +15,9 @@ from flask import Flask, request
 from flask_restx import Api, Resource
 
 app = Flask(__name__)
-api= Api(app)
+api = Api(app)
+api.app.config['RESTX_JSON'] = {'ensure_ascii': False, 'indent': 2}
+
 all_ns = api.namespace('')
 
 # @app.route('/', methods=['GET', 'POST'])
@@ -47,46 +49,60 @@ class UsersView(Resource):
         new_user = User(**req_json)
         with db.session.begin():
             db.session.add(new_user)
-        return "", 201
+        return '', 201  # Created
 
 @all_ns.route('/<int:uid>')
 class UserView(Resource):
     def get(self, uid: int):
         try:
-            user = User.qury.filter(User.id = uid).one()
+            user = User.query.filter(User.id == uid).one()
+        except Exception as error:
+            retrun str(error), 404
+        else:
             return user_schema.dump(book), 200
-        except Exception as e:
-            retrun "", 404
     
     def put(self, uid: int):
-        user = User.qury.get(uid)
         req_json = request.json
-        
-        user.name = req_json.get(name)
-        ...
+        try:
+            user = User.query.filter(User.id == uid).one()
+        except Exception as error:
+            retrun str(error), 404
+        else:        
+            user.name = req_json.get(name)
+             ...
 
-        db.session.add(user)
-        db.session.commit()
-        return "", 204
+            db.session.add(user)
+            db.session.commit()
+            db.session.close()
+            return "", 204  # No Response
     
     def patch(self, uid: int):
-        user = User.qury.get(uid)
         req_json = request.json
-        
-        if 'name' in req_json:
-            user.name = req_json.get(name)
-        ...
+        try:
+            user = User.query.filter(User.id == uid).one()
+        except Exception as error:
+            retrun str(error), 404
+        else:
+            if 'name' in req_json:
+                user.name = req_json.get(name)
+            ...
 
-        db.session.add(user)
-        db.session.commit()
-        return "", 204
+            db.session.add(user)
+            db.session.commit()
+            db.session.close()
+            return "", 204  # No Response
     
     def delete(self, uid: int):
-        user = User.qury.get(uid)
+        try:
+            user = User.query.filter(User.id == uid).one()
+        except Exception as error:
+            retrun str(error), 404
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            db.session.close()
+            return "", 204  # No Response
 
-        db.session.delete(user)
-        db.session.commit()
-        return "", 204
 
 if __name__ == '__main__':  # для команды flask не нужно
     app.run(debug=True)
