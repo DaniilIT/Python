@@ -419,6 +419,8 @@ app.config.from_pyfile('config.py')
 # или
 app.config.from_object(Config_1())
 # print(app.config.get('PATH'))
+
+app.app_context().push()
 ```
 
 

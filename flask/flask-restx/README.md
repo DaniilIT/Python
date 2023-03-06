@@ -41,11 +41,13 @@ all_ns = api.namespace('')
 @all_ns.route('/')
 class UsersView(Resource):
     def get(self):
+        # all_users = user_dao.get_all()
         all_users = User.query.all()  # SQLAlchemy
         return users_schema.dump(all_users), 200  # Marshmallow
     
     def post(self):
         req_json = request.json
+        # user_dao.create(req_json)
         new_user = User(**req_json)
         with db.session.begin():
             db.session.add(new_user)
@@ -54,6 +56,7 @@ class UsersView(Resource):
 @all_ns.route('/<int:uid>')
 class UserView(Resource):
     def get(self, uid: int):
+        # user = user_dao.get_one(uid)
         try:
             user = User.query.filter(User.id == uid).one()
         except Exception as error:
@@ -63,6 +66,8 @@ class UserView(Resource):
     
     def put(self, uid: int):
         req_json = request.json
+        # req_json['id'] = uid
+        # user_dao.update(req_json)
         try:
             user = User.query.filter(User.id == uid).one()
         except Exception as error:
@@ -78,6 +83,8 @@ class UserView(Resource):
     
     def patch(self, uid: int):
         req_json = request.json
+        # req_json['id'] = uid
+        # user_dao.update_partial(req_json)
         try:
             user = User.query.filter(User.id == uid).one()
         except Exception as error:
@@ -93,6 +100,7 @@ class UserView(Resource):
             return "", 204  # No Response
     
     def delete(self, uid: int):
+        # user_dao.delete(uid)
         try:
             user = User.query.filter(User.id == uid).one()
         except Exception as error:
@@ -116,6 +124,13 @@ if __name__ == '__main__':  # для команды flask не нужно
 * повышают тестируемос кода
 
 ```python
+from flask_restx import Api, Resource
+
+api = Api(app)
+api.app.config['RESTX_JSON'] = {'ensure_ascii': False, 'indent': 2}
+
+# book_ns = Namespace('books')
+# api.add_namespace(book_ns)
 book_ns = api.namespace('books')
 author_ns = api.namespace('authors')
 
@@ -123,6 +138,7 @@ author_ns = api.namespace('authors')
 class BooksView(Resource):
     ...
 ```
+
 
 ## CURL
 
@@ -135,3 +151,60 @@ curl -X GET 'http://127.0.0.1:5000/'
 ```
 curl -X POST 'http://127.0.0.1:5000/' -H 'Content-Type: application/json' -d '{"name": "Daniil"}'
 ```
+
+
+## DAO
+
+\- Data Access Object
+
+```python
+# app/dao/user.py
+from app.models.user import User
+
+# CRUD
+class UserDAO:
+    def __init__(self, session):
+        self.session = session
+    
+    def get_one(self, uid):
+        return self.session.query(User).get(uid)
+    
+    def get_all(self):
+        return self.session.query(User).all()
+    
+    def create(self, data):
+        user = User(**data)
+        self.session.add(user)
+        self.session.commit()
+        # return user
+    
+    def update(self, data):
+        uid = data.get('id')
+        user = self.get_one(uid)
+        
+        user.name = req_json.get(name)
+        ...
+        
+        self.session.add(user)
+        self.session.commit()
+        # return user
+    
+    def update_partial(self, data):
+        uid = data.get('id')
+        user = self.get_one(uid)
+        
+        if 'name' in req_json:
+            user.name = req_json.get(name)
+        ...
+        
+        self.session.add(user)
+        self.session.commit()
+        # return user
+    
+    def delete(self, uid):
+        user = self.get_one(uid)
+        
+        self.session.delete(user)
+        self.session.commit()
+```
+
