@@ -16,12 +16,12 @@
 \- предоставление клиенту прав на выполнение определенных действий;
 
 ```
-pip install pyjwt
+pip install PyJWT
 ```
 
 ```python
 from calendar import timegm
-from datatime import datatime, timedelta
+from datetime import datetime, timedelta
 from flask import Flask, request, abort
 from flask_restx import Api, Resource
 import jwt
@@ -34,7 +34,7 @@ secret = 's3cR$eT'  # не изменять!
 algo = 'HS256'  # алгоритм
 
 def generate_token(data):  # в токене есть информация о пользователе
-    min30 = datatime.utcnow() + timedelta(minutes=30)
+    min30 = datetime.utcnow() + timedelta(minutes=30)
     data['exp'] = timegm(min30.timetuple())
     token = jwt.encode(data, secret, algorithm=algo)
     return token
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
 ## Пароли
 
-хранятся результаты работы **хеш функции** (например md5, SH256, SH512).
+хранятся результаты работы **хеш функции** (например md5, SHA256, SHA512).
 
 \- функция, которая **необратимо** искажает исходную строку, пулучая на выходе **хеш**.
 
@@ -117,6 +117,8 @@ class User(db.Model):
 
 ```python
 # app/views/user
+from app.decorators import admin_required 
+
 @user_ns.route('/<int:user_id>')
 class UserView(Resource)
     @admin_required    
@@ -126,25 +128,28 @@ class UserView(Resource)
 ```
 
 ```python
+# app/views/auth
+from app.implemented import auth_service
+
 @auth_ns.route('/')
 class AuthsView(Resource)
     def post(self):
         data = request.json
         
-        username = data.get('username', None)
-        password = data.get('password', None)
+        username = data.get('username')
+        password = data.get('password')
         if None in [username, password]:
-            return '', 400
+            abort(400)
             
-        tokens = auth_service.generate_tokens(username, passwords)
-        return tokens, 201
+        tokens = auth_service.generate_tokens(username, password)
+        return jsonify(tokens), 201
         
     def put(self):
         data = request.json
         token = data.get('refresh_token')
         
         tokens = auth_service.approve_refresh_token(token)
-        return tokens, 201
+        return jsonify(tokens), 201
 ```
 
 ### service
@@ -152,18 +157,18 @@ class AuthsView(Resource)
 ```python
 # app/services/auth
 from calendar import timegm
-form datatime import datatime
+from datetime import datetime, timedelta
 import jwt
-from flask import request, abort
-from app.helpers.constants import JWT_SECRET, JWT_ALGORITHM  # 'secret', 'HS256'
-from app.service import UserService
-from app.container import auth_service
+from flask import abort
+from constants import JWT_SECRET, JWT_ALGORITHM  # 'secret', 'HS256'
+from app.service.user import UserService
+
 
 class AuthService:
     def __init__(self, user_service: UserService):
         self.user_service = user_service
 
-    def generate_token(self, username, password, is_refresh=False):
+    def generate_tokens(self, username, password, is_refresh=False):
         user = self.user_service.get_by_username(username)
         
         if user is None:
@@ -178,11 +183,11 @@ class AuthService:
             'role': user.role,
         }
         
-        min30 = datatime.utcnow() + timedelta(minutes=30)
+        min30 = datetime.utcnow() + timedelta(minutes=30)
         data['exp'] = timegm(min30.timetuple())
         access_token = jwt.encode(data, JWT_SECRET, algorithm=JWT_ALGORITHM)
         
-        days30 = datatime.utcnow() + timedelta(days=30)
+        days30 = datetime.utcnow() + timedelta(days=30)
         data['exp'] = timegm(days30.timetuple())
         refresh_token = jwt.encode(data, JWT_SECRET, algorithm=JWT_ALGORITHM)
         
@@ -193,7 +198,7 @@ class AuthService:
     
     def approve_refresh_token(self, refresh_token):
         data = jwt.decode(jwt=refresh_token, key=JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        username = data.get('username)
+        username = data.get('username')
         return self.generate_tokens(username, None, is_refresh=True)
 
 ```
@@ -204,44 +209,36 @@ import base64
 import hashlib
 import hmac
 
-from app.helpers.constants import PWD_ITERATIONS, PWD_SALT  # 10_000, b'salt'
+from app.helpers.constants import PWD_HASH_TERATIONS, PWD_HASH_SALT  # 10_000, b'salt'
 from app.dao.user import UserDAO
 
 class UserService:
     def __init__(self, dao: UserDAO):
         self.dao = dao
 
-    def get_one(self, user_id):
-        user = self.dao.get_one(user_id)
-        return user
-
-    def get_all(self, **args):
-        users = self.dao.get_all(**args)
-        return users
+    # ...
         
     def get_by_username(self, username):
         user = self.dao.get_by_username(username)
         return user
 
     def create(self, user_dict):
-        user_dict['password'] = self.make_password_hash(user_dict.get('password'))
+        user_dict['password'] = self.generate_password_hash(user_dict.get('password'))
         user_id = self.dao.create(req_json)
         return user_id
-
-    def delete(self, user_id):
-        user = self.get_one(user_id)
-        self.dao.delete(user)
         
     def get_hash_digest(self, password):
         return hashlib.pbkdf2_hmac(
             'sha256',
             password.encode('utf-8'),
-            PWD_SALT,
-            PWD_ITERATIONS
+            PWD_HASH_SALT,
+            PWD_HASH_ITERATIONS
         )  # бинарная последовательность чисел
         
-    def make_password_hash(self, password):
+    def generate_password_hash(self, password):
+        # return hashlib.md5(password.encode('utf-8')).hexdigest()
         hash_digest = self.get_hash_digest(password)
+        # return hash_digest.decode('utf-8', 'ignore')
         return base64.b64encode(hash_digest)
     
     def compare_passwords(self, password_hash, other_password) -> bool:
@@ -254,10 +251,10 @@ class UserService:
 ### decorators
 
 ```python
-# app/helpers/decorators
+# app/decorators
 import jwt
 from flask import request, abort
-from app.helpers.constants import JWT_SECRET, JWT_ALGORITHM  # 'secret', 'HS256'
+from constants import JWT_SECRET, JWT_ALGORITHM  # 'secret', 'HS256'
 
 def admin_required(func):
     def wrapper(*args, **kwargs):
@@ -268,7 +265,6 @@ def admin_required(func):
         token = data.split('Bearer ')[-1]
         role = None
         
-        role = None
         try:
             user = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             role = user.get('role', 'user')
