@@ -43,7 +43,7 @@ finally:
 
 ## тестирование
 
-1. Unit - модульное тестирование функций и классов.
+1. Unit - модульное тестирование функций и классов. - быстрые, легкие и дешевые.
 2. Интеграционное - тестирование связи с внешними источниками, API, баз данных.
 3. UI - тестирование производительности, защищенности и надежности.
 
@@ -91,6 +91,9 @@ def test_my_function_3():
 pytest
 # или (можно без tests/__init__.py)
 python -m pytest
+
+pytest -v  # подробный вывод (verbose)
+pytest -s  # вывод print
 ```
 
 
@@ -118,9 +121,9 @@ from utils import my_function
 my_function_parameters = [(0, 0, 1), (1, 2, 6), (1, -1, 0)]
 
 class TestMyFunction:
-    @pytest.mark.parametrize('first, second, expected', my_function_parameters)
-    def test_my_function(self, first, second, expected):
-        assert my_function(first, second) == expected, f'my_function is wrong for {first} and {second}'
+    @pytest.mark.parametrize('numbers', my_function_parameters)
+    def test_my_function(self, numbers: list[tuple]):
+        assert my_function(numbers[0], numbers[1]) == numbers[2], f'my_function is wrong for {numbers}'
 ```
 
 
@@ -188,7 +191,7 @@ class TestCircle:
 
 ## Фикстурa
 
-\- функция, которая выполняется до тестирования для подготовки данных. 
+\- функция, которая выполняется до тестирования (и после) для подготовки данных. 
 
 ```python
 # conftest.ру
@@ -207,6 +210,25 @@ from utils import my_function
 class TestMyFunction:
     def test_my_function(self, some_test_data):
         assert my_function(some_test_data[0]) == some_test_data[1]
+```
+
+### Параметры фикстур
+
+```python
+@pytest.fixture(autouse=True)  # выполняется без необходимости указывать её в агрумнтах
+def some_do():
+    ...  # выполняется до тестов
+    yield
+    ...  # выполняется после тестов
+    
+@pytest.fixture(scope='function / class / module/ session')  # выполняется для функций / классов / модулей / один раз за всё тестирование
+```
+
+### Дополнительные декораторы
+
+```python
+@pytest.mark.skip(reason='ok')  # пропуск теста
+@pytest.mark.xfail()  # указывает на ожидание неправильного результата
 ```
 
 
@@ -339,4 +361,56 @@ class TestMain:
         data = {'name': 'Daniil'}
         response = test_client.post('/form', json=data)
         assert response.status_code == 200
+```
+
+## Моки
+
+**service** - слой бизнес логики, который работает с предметной областью.
+
+**мокированный класс** - класс с методами, при вызове которых происходит не то что в них написано, а то чтонужно для тестов.
+
+\- нужны для симуляции работы с тем, чего нет в локальном окружении, например с DB или внешним сервисом.
+
+```python
+# tests/services/test_user
+from unittest.mock import MagicMock
+import pytest
+
+@pytest.fixture()
+def user_dao():
+    user_dao = UserDAO(None)
+    user = User(id=1, username='Daniil')
+    
+    user_dao.get_one = MagicMock(return_value=user)
+    user_dao.delete = MagicMock()
+    user_dao.create = MagicMock(side_effect=Exception('my error'))  # симуляция вызова ошибки
+    return user_dao
+
+# class UserService:
+#    def __init__(self, dao: UserDAO):
+#        self.dao = dao
+#
+#    def get_one(self, user_id):
+#        return self.dao.get_one(user_id)
+#
+#    def create(self, user_dict):
+#        return self.dao.create(user_dict)
+#
+#    def delete(self, user_id):
+#        self.dao.delete(self.get_one(user_id))
+
+class TestUserService:
+    @pytest.fixture(autouse=True)
+    def user_service(self, user_dao):
+        self.user_service = UserService(dao=user_dao)
+    
+    def test_get_one(self):
+        user = self.user_service.get_one(1)
+        assert user != None
+        assert user.id == 1
+    
+    def test_create(self):
+        user_dict = {'username': 'Daniil'}
+        with pytest.raises(exception):
+            self.user_service.create(user_dict)
 ```
