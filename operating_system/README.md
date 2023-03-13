@@ -69,6 +69,7 @@ print(os.getenv('HOME'))  # переменные среды
 print(os.environ.get('HOME'))  # '/Users/daniil'
 os.environ['USER'] = 'Daniil'
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 print(os.getcwd())  # показать путь к текущей директории
 os.listdir('./data')  # показать содержимое cwd
 os.chdir('..')  # перейти в директорию

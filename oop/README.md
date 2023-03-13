@@ -5,7 +5,8 @@
 Является противопоставлением *функциональному (процедурному)*, где существует жесткое разделение между данными и функциями.
 
 **Абстракция** - представление из полей и методов объектов, которые описывают реальные физические объекты.\
-**Классы** - (реализация абстракций) шаблоны для создания объектов (*экземпляров класса*).
+**Классы** - (реализация абстракций) шаблоны для создания объектов (*экземпляров класса*).\
+**Интерфейс** - набор публичных методов, через которые можно взаимодествовать с объектом.
 
 *ООП* базируется на принципах:
 
@@ -24,10 +25,10 @@ class Account:
         return self.__balance
 
     def set_balance(self, balance):
-        self._private()
-        self.__balance = balance
+        self._storage()  # underscore (защищенные)
+        self.__balance = balance  #  dunder (private)
         
-    def _private(self):  # underscore
+    def _storage(self):
         print('hided')
         
 account = Account(0)
@@ -60,6 +61,8 @@ circle.draw()  # Drawing a red shape
 
 ### Множественное наследование
 
+\- создание цепочки связей класснов с целью комбинирования и сочетания функциональности сразу нескольких классов в одном.
+
 Ромбовидное наследование (diamond problem) - для определения порядка используется алгоритм поиска в ширину.
 
 ```python
@@ -86,6 +89,7 @@ C.mro()  # [__main__.C, __main__.A1, __main__.A2, __main__.B1, object]
 
 ## Полиморфизм
 
+\- свойство, при котором различные обьекты с однаковым поведением используются одним и тем же образом.\
 Гибкость, то есть дочерние классы могут расширять и переопределять методы родителя.\
 **overloading (перегрузка)** - это способность метода или оператора выполнять разные действия в зависимости от типа.
 
@@ -111,14 +115,14 @@ for shape in shapes:
 Классы могут определять общие свойства и методы для группы объектов.
 
 ```python
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod 
 
 class A(ABC):
     def __init__(self):
         pass
 
     @abstractmethod
-    def am(self):
+    def am(self):  # сигнатура
         pass
 
 class B(A):    
@@ -178,8 +182,12 @@ print(add_to('b'))  # ['a', 'b']
 \- это инструмент, при котором одна функция принимает в качестве аргумента другую функцию, и оборачивает её новой функцией, что расширяет функциональность без непосредственного изменения кода декарируемой функции.
 
 ```python
+from functools import wraps
+
 def count_calls(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
+        """Oh, No"""
         wrapper.calls += 1
         result = func(*args, **kwargs)
         return result
@@ -188,12 +196,29 @@ def count_calls(func):
 
 @count_calls
 def my_func():
+    """Docstring"""
     pass
 # my_func = count_calls(my_func)
 
 my_func()
 my_func()
 print(my_func.calls)  # 2
+print(my_func.__name__, my_func.__doc__)  # my_func Docstring
+```
+
+Декоратор с параметрами:
+```python
+def decor_count_calls(start):
+    def count_calls(func):
+        def wrapper(*args, **kwargs):
+            ...
+        wrapper.calls = start
+        return wrapper
+    return count_calls
+
+@decor_count_calls(2)
+def my_func():
+    pass
 ```
 
 ---
