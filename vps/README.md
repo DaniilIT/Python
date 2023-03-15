@@ -74,7 +74,7 @@ DNS используется не только для получения адр�
 Посмотреть DNS-записи:
 ```shell
 dig sky.pro any
-``
+```
 
 
 ## APT
@@ -93,7 +93,7 @@ apt update  :: обновить БД пакетов
 apt install python  :: установить пакет Python
 apt remove python
 apt install --reinstall python
-``
+```
 
 Установка Python 3.10:
 ```shell
