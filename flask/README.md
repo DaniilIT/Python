@@ -2,7 +2,7 @@
 
 \- микрофреймворк для создания веб приложения.
 
-<img src="images/flask.webp" alt="logo flask" title="Logo flask" style="height: 380px;" />
+<img src="images/flask.webp" alt="logo flask" title="Logo flask" style="height: 240px;" />
 
 *Модуль* - это файл, который содержит исполняемый код на python.\
 *Пакет* - набор модулей, папка, которая содержит файл init.py в качестве флага.\
@@ -66,7 +66,12 @@ flask run --debug
 >> Python 12058 daniil 4u IPv4 0xadf36d703ab2444f 0t0 TCP localhost:5000 (LISTEN)
 ```
 
-Убить процесс по PID: `kill 12058`
+Убить процесс по PID: `kill 12058` или:
+
+```shell
+kill -9 $(lsof -t -i:80)
+```
+
 
 
 ## [Jinjа2](https://jinja.palletsprojects.com/en/latest/)
@@ -421,6 +426,18 @@ app.config.from_object(Config_1())
 # print(app.config.get('PATH'))
 
 app.app_context().push()
+```
+
+### прописать путь до файла приложения в переменную окружения
+
+```shell
+export FLASK_APP=./main.py
+```
+
+### запустить приложение на определенном хосте
+
+```shell
+python3.11 -m flask run -h 0.0.0.0 -p 80
 ```
 
 

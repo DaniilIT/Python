@@ -27,6 +27,8 @@
 создать SHH ключи:
 ```shell
 ssh-keygen -t rsa
+
+cat ~/.ssh/id_rsa.pub
 ```
 
 Публичный ключ надо положить на сервер в #.ssh/id_rsa.pub
@@ -40,8 +42,9 @@ ssh-keygen -t rsa
 2) подключиться
 3) Computer Cloud
 4) Создать BM
-5) ...
-6) Cloud DNS - привязать доменное имя (зона: `***.ga.`).
+5) Платформа "Intel Cascade Lake" 
+6) ...
+7) Cloud DNS - привязать доменное имя (зона: `***.ga.`).
 
 
 ## подключение:
@@ -50,6 +53,8 @@ ssh-keygen -t rsa
 ssh login@xxx.xxx.xxx.xxx
 
 ssh login@***.ga
+
+exit  :: выйти из VM
 ```
 
 посмотреть запущенные процессы:
@@ -100,7 +105,7 @@ apt install --reinstall python
 sudo su
 add-apt-repository ppa:deadsnakes/ppa  :: обновление базы apt
 apt install python3.10
-``
+```
 
 Установка БД PostgreSQL:
 ```shell
@@ -118,7 +123,7 @@ psql -U flask_app_user -h 127.0.0.1 flask_app
 apt install python3.10-venv
 
 python3.10 -m venv env
-. env/bin/activate
+. env/bin/activate  :: source env/bin/activate
 ```
 
 
@@ -133,7 +138,7 @@ python3.10 -m venv env
 ```shell
 scp test.txt malenko@51.250.22.196:test.txt  :: копирование одного файла
 scp -r dir/ malenko@51.250.22.196:.  :: копирование директории
-
+ 
 scp -r dir_name malenko@***.ga:flask_app    :: копирование директории
 ```
 
@@ -144,17 +149,18 @@ scp -r dir_name malenko@***.ga:flask_app    :: копирование дирек
 
 юнит-файл:
 ```
-# /etc/systemd/system/flask-api.service
+# vim /etc/systemd/system/flask-api.service  # esc + :wq
 
 [Unit]
 Description=Flask-app
 After=network.target
 
 [Service]
-WorkingDirectory=/opt/app/flask-app/
+WorkingDirectory=/opt/app/flask-app/  # /home/...
 ExecStart=/opt/app/env/bin/python -m flask run -h 0.0.0.0 -p 80
 Environment="APP_SETTINGS=/etc/flask-app/config.py"
 Restart=always
+Envirenment="FLASK_APP=main.py"
 
 [Install]
 WantedBy=multi-user.target
@@ -173,4 +179,9 @@ systemctl start flask-api  :: название берется из назван�
 посмотреть работу приложения:
 ```shell
 systemctl status flask_app
+```
+
+посмотреть журнал вызовов:
+```shell
+journalctl -u flask-app -f -n 1000
 ```
