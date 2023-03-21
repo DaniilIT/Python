@@ -74,14 +74,29 @@ django-admin startproject <name_project> .
 from django.db import models
 
 class M(models.Model):
+    STATUS = [
+        ('draft', 'Черновик'),
+        ('open', 'Открыта'),
+        ('closed', 'Закрыта')
+    ]
+    
+    slug = models.SlugField(max_length=50)
     text = models.CharField(max_length=100)
+    status = models.CharField(max_length=6, choices=STATUS, default='draft')
+    created = models.DateField(auto_now_add=True)  # datatime.date.now
+    
+    def __str__(self):
+        return self.slug
 ```
+
+<img src="images/fields.png" alt="fields" title="Fields" style="height: 380px;" />
 
 **Миграция** фиксирует текущее состояние DB.
 
 ```shell
 ./manage.py makemigrations
 ./manage.py migrate  :: накатить
+./manage.py migrate <name_app> <num>  :: откатить
 ```
 
 
@@ -128,7 +143,7 @@ def hello(request):
 def get(request, item_id):
     if request.method == 'GET':
         try:
-            vacancy = M.objects.get(pk=item_id)
+            item = M.objects.get(pk=item_id)
         except Vacancy.DoesNotExist as exc:
             return JsonResponse({'error': str(exc)}, status=404)
         
@@ -158,4 +173,97 @@ def index(request):
 
         return JsonResponse(response, safe=False,  # Передаем не словарь
                             json_dumps_params={"ensure_ascii": False})
+```
+
+## POST запрос
+
+### CSRF
+
+\- вектор атаки, межсайтовой подделки запросов, при котором вредоностный сайт делает запрос как-будто он уже авторизован.
+
+В django отключить проверку csrf-токена можно через декторатор:
+```python
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def index(request):
+    if request.method == 'GET':
+        pass
+    elif request.method == "POST":
+        item_data = json.loads(request.body)
+
+        item = Vacancy()
+        item.text = item_data.get('text')
+
+        item.save()
+        
+        return JsonResponse({
+            'id': item_id,
+            'text': item.text,
+        }, json_dumps_params={"ensure_ascii": False}) 
+```
+
+## class-based view
+
+\- подход к написанию вьюшек через классы.
+
+```python
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import DetailView
+from ms.models import M
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MView(View):
+    def get(self, request):
+        pass
+    
+    def post(self, request):
+        pass
+
+
+class MDetailView(DetailView):  # ListView для достуа к списку записей
+    model = M
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            # item = M.objects.get(pk=pk)
+            item = self.get_object()  # self.object_list
+        except M.DoesNotExist as exc:
+            return JsonResponse({'error': str(exc)}, status=404)
+        
+        return JsonResponse({
+            'id': item.id,
+            'text': item.text,
+        }, json_dumps_params={"ensure_ascii": False})
+```
+
+```python
+urlpatterns = [
+    ...
+    # path('items/', views.index),
+    path('items/', views.MView.as_view()),  # expect callable, который принимает первым аргументом request
+    # path('items/<int:item_id>', views.get),
+    path('vacancy/<int:pk>/', views.MDetailView.as_view()),  # pk or slug
+]
+```
+
+
+## Панель Админки
+
+\- UI над DB и позволяет гибко настраивать доступ
+
+```python
+# name_app/admin.py
+from django.contrib import admin
+from items.models import M
+
+admin.site.register(M)
+```
+
+### создать супер пользователя
+
+```shell
+./manage.py createsuperuser
 ```
