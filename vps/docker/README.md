@@ -92,12 +92,15 @@ docker run nginx:1.20  :: зауск конкретной версии веб-с
 * запускается команда `CMD` из Dockerfile и ей выдается PID 1
 
 ```bash
-docker ps  :: посмотреть запущенные процессы
+docker ps  :: отобразить запущенные контейнеры
 docker ps -a  :: посмотреть и остановленные процессы
 docker logs <id / name>  :: посмотреть логи приложения
-docker rm <id>  :: остановить приложение
-docker rm -f <id>  :: даже работающее
-docker system prune  :: удалить остановленные приложения из ps -a
+docker start <id>  :: запустить остановленный контейнер
+docker restart <id>  :: перезапустить контейнер
+docker stop <id>  :: остановить контейнер
+docker rm <id>  :: удалить контейнер
+docker rm -f <id>  :: даже работающий контейнер
+docker system prune  :: удалить всё
 ```
 
 ## Сеть
@@ -133,7 +136,11 @@ COPY docker_config.py default_config.py
 CMD flask run -h 0.0.0.0 -p 80
 ```
 
-### Запуск PosgreSQL
+### Запуск [PosgreSQL](https://www.postgresql.org/download/)
+
+```bash
+docker run -p 5432:5432 --name <app_name>_postgres -e POSTGRES_PASSWORD=postgres -d postgres
+```
 
 ```python
 # ./docker_config.py
@@ -142,11 +149,11 @@ SQLALCHEMY_DATABASE_URL = 'postgresql://flask_app:password@pg/flask_app'
 
 Запуск двух контейнеров в одной сети:
 ```bash
-docker run --name postgres  :: название контейнера
-	-e POSTGRES_USER=flask_app  # прокинуть переменные окружения внутрь
-	-e POSTGRES_PASSWORD=password
-	-e POSTGRES_DB=flask-app
-	--network=flask_app
+docker run --name <app_name>_postgres  :: название контейнера
+	-e POSTGRES_USER=<app_name>  # поумолчанию postgres
+	-e POSTGRES_PASSWORD=password  # прокинуть переменные окружения внутрь
+	-e POSTGRES_DB=<app_name>  # поумолчанию postgres
+	--network=<app_name>
 	--network-alias pg
 	-v $(pwd)/pg_data:/var/lib/postgresql/data  :: volume
 	-d postgres <key>  :: запустить в фоновом режиме

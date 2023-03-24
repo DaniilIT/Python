@@ -67,10 +67,14 @@ django-admin startproject <name_project> .
 подключение модуля приложения:
 ```python
 # <name_project>/settings.py
+
 INSTALLED_APPS = [
     ...
     '<name_app>',
 ]
+
+MEDIA_URL = '/media/'  # путь, по которому будут доступны файлы
+MEDIA_ROOT = BASE_DIR.joinpath('media')  # адрес, по которму хранятся файлы
 ```
 
 Настройка интепретатора:
@@ -83,32 +87,63 @@ INSTALLED_APPS = [
 
 ```python
 # name_app/models.py
+from django.contrib.auth.models import User
 from django.db import models
 
-class M(models.Model):
-    STATUS = [
-        ('draft', 'Черновик'),
-        ('open', 'Открыта'),
-        ('closed', 'Закрыта')
-    ]
+class Skill(models.Model):
+    name = models.CharField(max_length=20)
     
-    description = models.TextField(null=True, blank=True)
+    # определение служебной информации о модели
+    class Meta:
+        verbose_name = 'Навык'  # название модели
+        verbose_name_plural = 'Навыки'
+        ordering = ['-name']  # сортировка, но привязывается ко всем запросам
+    
+
+class M(models.Model):
+    # STATUS = [
+    #     ('draft', 'Черновик'),
+    #     ('open', 'Открыта'),
+    #     ('closed', 'Закрыта')
+    # ]
+    class Status(models.TextChoices):
+        DRAFT = 'draft', 'Черновик'
+        OPEN = 'open', 'Открыта'
+        CLOSED = 'closed', 'Закрыта'
+    
+    # blank=True
     slug = models.SlugField(max_length=50)
-    text = models.CharField(max_length=100)
-    status = models.CharField(max_length=6, choices=STATUS, default='draft')
-    price = models.DecimalField(max_digits=15, decimal_places=2)
-    image = models.ImageField(null=True, blank=True, upload_to='ad_images')
+    description = models.TextField(null=True, blank=True)
+    # status = models.CharField(max_length=6, choices=STATUS, default='draft')
+    status = models.CharField(max_length=6, choices=Status.choices, default=Status.DRAFT)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    image = models.ImageField(upload_to='logos/')  # MEDIA_ROOT + путь до сохранения
     time_create = models.DateTimeField(default=timezone.now)
-    created = models.DateField(auto_now_add=True)  # datatime.date.now
+    created = models.DateField(auto_now_add=True)  # default=datatime.date.now
     is_activated = models.BooleanField(default=False)
+    
+    # связь O2M (User - One)  # on_delete - что делать при удалении записи, на которую ссылается FK
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # создаст user_id
+    category = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    # связь M2M
+    skills = models.ManyToManyField(Skill)
     
     def __str__(self):
         return self.slug
 ```
 
+null=True - заменять пустые значения на NULL в DB\
+unique=True - проверять на уникальность значений\
+blank=True - разпешить пустые значения в формах, по-умолчанию обязателен\
+
 <img src="images/fields.png" alt="fields" title="Fields" style="height: 570px;" />
 
-**Миграция** фиксирует текущее состояние DB.
+
+### **Миграции** 
+
+\- фиксируют текущее состояние DB.\
+\- помогают быстро развернуть DB с нуля.
+
 
 ```bash
 ./manage.py makemigrations
@@ -127,14 +162,21 @@ class M(models.Model):
 # name_project/urls.py
 from django.contrib import admin
 from django.urls import path, include
-from name_app import views
+from app_name import views
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('items/', views.index),
+    path('', views.index),
+    path('items/', views.ItemView.as_view()),  # expect callable, который принимает первым аргументом request
     path('items/<int:item_id>', views.get),
-    path('', include('app.urls'))  # подключить список
+    path('user/<int:pk>/', views.UserDetailView.as_view()),  # pk or slug
+    path('app_name/', include('app_name.urls'))  # подключить список
 ]
+
+if settings.DEBUG:  # доступ к файлам
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 Допустимые параметры:
@@ -148,10 +190,10 @@ urlpatterns = [
 ## Создать view
 
 ```python
-# name_app/views.py
+# app_name/views.py
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from name_app.models import M
+from app_name.models import M
 
 def hello(request):
     return HttpResponse('Hello world')
@@ -206,18 +248,15 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def index(request):
-    if request.method == 'GET':
-        pass
-    elif request.method == "POST":
+    if request.method == "POST":
         item_data = json.loads(request.body)
 
         # item = M()
         # item.text = item_data.get('text')
         # item.save()
-        item = M.object.create(field=item_data.get('field'))
+        item = M.object.create(field=item_data.get('field'), ...)
         
-        return JsonResponse({'id': item_id, 'field': item.field},
-                                            json_dumps_params={"ensure_ascii": False}) 
+        return JsonResponse({'id': item_id, 'field': item.field}) 
 ```
 
 
@@ -226,45 +265,139 @@ def index(request):
 \- подход к написанию вьюшек через классы.
 
 ```python
+import json
+from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import ValidationError
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView
-from ms.models import M
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from app_name.models import M, Skill
 
-@method_decorator(csrf_exempt, name='dispatch')
-class MView(View):
-    def get(self, request):
-        pass
-    
-    def post(self, request):
-        pass
+# @method_decorator(csrf_exempt, name='dispatch')
+# class MView(View):
+#    def get(self, request):
+#        pass
+#    
+#    def post(self, request):
+#        pass
 
-
-class MDetailView(DetailView):  # ListView для достуа к списку записей
+class MListView(ListView):
     model = M
     
     def get(self, request, *args, **kwargs):
-        # try:
-        #     item = M.objects.get(pk=pk)
-        # except M.DoesNotExist as exc:
-        #     return JsonResponse({'error': str(exc)}, status=404)
-        # item = self.get_object()  # self.object_list
+        super().get(request, *args, **kwargs)
+        # self.object_list == M.objects.all()
+        
+        if search_text := request.GET.get("text"):
+            self.object_list = self.object_list.filter(text=search_text)
+        
+        response = []
+        for item in self.object_list:
+            response.append({...})
+        
+        return JsonResponse(response, safe=False)
+
+
+class MDetailView(DetailView):
+    model = M
+    
+    def get(self, request, *args, **kwargs):
+        item = self.get_object()
+        
+        return JsonResponse({...})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MCreateView(CreateView):
+    model = M
+    fields = ('field', ...)  # список fields для автоматической генерации форм в django
+    
+    def post(self, request, *args, **kwargs):
+        item_data = json.loads(request.body)
+        
+        user = get_object_or_404(User, pk=item_data['user_id'])
+         
+        item = M.objects.create(
+            text=item_data['text'],
+            ...
+            user=user
+        )
+        
+        for skill in item_data['skills']:
+            skill_obj, created = Skill.objects.get_or_create(name=skill, defaults={
+                'is_active': True
+            })
+            item.skills.add(skill_obj)
+        
+        return JsonResponse({...}, status=302)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MUpdateView(UpdateView):
+    model = M
+    fields = ('text', ...)
+    
+    def patch(self, request, *args, **kwargs):
+        super().post(request, *args, **kwargs)
+        
+        item_data = json.loads(request.body)
+        self.object.field = item_data['field']
+        ...
+        
+        # для связи M2M
+        for skill in self.object.skills.all():
+            self.object.skills.remove(skill)
+        for skill in item_data['skills']:
+            # try:
+            #     skill_obj = Skill.objects.get(name=skill)
+            # except Skill.DoesNotExist:
+            #     return JsonResponse({'error': 'Skill not found'}, status=404)
+            skill_obj, is_created = Skill.objects.get_or_create(name=skill)  # get_object_or_404
+            self.object.skills.add(skill_obj)
+        
+        try:
+            self.object.full_clean()  # проверить ограничения полей
+        except ValidationError as error:
+            return JsonResponse(error.message_dict, status=422)  # Unprocessable Entity
+        
+        self.object.save()
+        return JsonResponse({
+            'text': self.object.text,
+            'user': self.object.user_id,
+            'skills': list(self.object.skills.all().values_list('name', flat=True)),
+        })
+
+
+# обновить картинку
+@method_decorator(csrf_exempt, name='dispatch')
+class NUpdateView(UpdateView):
+    model = N
+    fields = ['name', 'logo']
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        
+        self.object.logo = request.FILES.get('logo')  # из формы
+        self.object.save()
         
         return JsonResponse({
-            'id': item.id,
-            'text': item.text,
+            'id': self.object.id,
+            'name': self.object.name,
+            'logo': self.object.logo.url if self.object.logo else None
         }, json_dumps_params={"ensure_ascii": False})
-```
 
-```python
-urlpatterns = [
-    ...
-    # path('items/', views.index),
-    path('items/', views.MView.as_view()),  # expect callable, который принимает первым аргументом request
-    # path('items/<int:item_id>', views.get),
-    path('vacancy/<int:pk>/', views.MDetailView.as_view()),  # pk or slug
-]
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MDeleteView(DeleteView):
+    model = M
+    success_url = '/'  # перенаправить после удаления
+    
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+        return JsonResponse({}, status=204)
+        # return redirect(self.get_success_url())
 ```
 
 
@@ -277,7 +410,13 @@ urlpatterns = [
 from django.contrib import admin
 from items.models import M
 
-admin.site.register(M)
+# admin.site.register(M)
+
+@admin.register(M)
+class MAdmin(admin.ModelAdmin):
+    list_display = ('username', 'first_name', 'last_name', 'role')
+    search_fields = ('username',)
+    list_filter = ('role',)
 ```
 
 ### создать супер пользователя
@@ -285,3 +424,140 @@ admin.site.register(M)
 ```bash
 ./manage.py createsuperuser
 ```
+
+
+## Postgres
+
+Запустить контейнер:
+```bash
+docker run -p 5432:5432 --name <app_name>_postgres -e POSTGRES_PASSWORD=postgres -d postgres:14.5-alpine
+dacker ps  # посмотреть запущенные контейнеры
+```
+
+**psycopg2** - модуль для работы с postgres
+```bash
+poetry add psycopg2  # если не сработает, то:
+poetry add psycopg2-binary
+```
+
+подключение:
+```python
+# project_name/settings.py
+
+DATABASES = {
+    'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
+
+```shell
+psql -U user_name -d db_name -h 127.0.0.1
+\q  # выйти
+\dt  # отобразить таблицы
+```
+
+
+## Действия с DB
+
+сортировка:
+```python
+self.object_list = self.object_list.order_by('name', '-last_name')
+```
+
+количество записей:
+```python
+total = self.object_list.count()
+```
+
+limit, ofset:
+```python
+# self.object_list == self.object_list[:total]
+self.object_list = self.object_list[2:2+3]  # пропустить первые два и вывести три
+```
+
+#### Пагинация:
+
+```python
+paginator = Paginator(self.object_list, settings.TOTAL_ON_PAGE)
+page_number = request.GET.get('page')
+page_obj = paginator.get_page(page_number)
+response = {
+    'items': page_obj,
+    'per_page': settings.TOTAL_ON_PAGE,
+    'num_pages': paginator.num_pages,
+    'total': paginator.count  # количество записей
+}
+```
+
+### Группировка
+
+#### Annotate:
+
+добавляет колонку, в которой для каждой записи просчитывается результат
+
+```python
+from django.db.models import Count, Avg, Max
+
+# users_qs = User.objects.annotate(total_items=Count('item'))
+self.object_list = self.object_list.annotate(total_items=Count('item'))
+```
+
+query set - это запрос, произойдет который только при попытке вытащить данные
+
+#### Aggregate:
+
+посчитает общее значение по всей таблице
+
+```python
+avg_items = user_qs.aggregate(Avg('items'))  # {'items__avg': result}
+avg_items = user_qs.aggregate(fuck=Avg('items'))['fuck']  # result
+
+max_price = Book.objects.all().aggregate(Max('price'))  # {'price__max': result}
+```
+
+### Join
+
+`select_related` - обратиться к колонке связной таблицы\
+`prefetch_related` - для M2M заранее запрашивает данные из связной таблицы
+
+```python
+self.object_list = self.object_list.select_related('user')  # Left Join работает для Foreing Key
+self.object_list = self.object_list.prefetch_related('skills')
+```
+
+```python
+class MListView(ListView):
+    model = M
+    
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+        
+        if search_text := request.GET.get("text"):
+            self.object_list = self.object_list.filter(text=search_text)
+        
+        self.object_list = self.object_list.select_related('user').prefetch_related('skills').order_by('text')
+        
+        response = []
+        for item in self.object_list:
+            response.append({
+                ...
+                'id': item.id,
+                'text': item.text,
+                # 'user': item.user_id,  # колонка родной таблицы
+                'user': item.user.username,  # если без select_related('user'), будет отдельный запрос для каждой записи
+                # 'skills': list(vacancy.skills.all().values_list('name', flat=True)),  # будет отдельный запрос для каждой записи
+                'skills': list(map(str, vacancy.skills.all()))  # если без prefetch_related('skills'), будет отдельный запрос для каждой записи
+            })
+        
+        return JsonResponse(response, safe=False)
+```
+
+
