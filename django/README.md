@@ -112,6 +112,7 @@ class M(models.Model):
         CLOSED = 'closed', 'Закрыта'
     
     # blank=True
+    # id = models.BigAutoField(primary_key=True)
     slug = models.SlugField(max_length=50)
     description = models.TextField(null=True, blank=True)
     # status = models.CharField(max_length=6, choices=STATUS, default='draft')
@@ -148,9 +149,10 @@ blank=True - разпешить пустые значения в формах, �
 ```bash
 ./manage.py makemigrations
 ./manage.py migrate  :: накатить
-./manage.py migrate <name_app> <num>  :: откатить
+./manage.py migrate app_name migration_num|zero  # откатить
+# после отката необходимо удалить файлы из migrations/
 
-./manage.py loaddata ./data/file.json  :: загрузить данные
+./manage.py loaddata ./data/file.json  # загрузить данные
 ```
 
 
@@ -525,7 +527,7 @@ max_price = Book.objects.all().aggregate(Max('price'))  # {'price__max': result}
 
 ### Join
 
-`select_related` - обратиться к колонке связной таблицы\
+`select_related` - обратиться к колонке связной таблицы (нужна, т. к. по умолчанию django JOIN не делает)\
 `prefetch_related` - для M2M заранее запрашивает данные из связной таблицы
 
 ```python
