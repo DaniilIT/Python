@@ -1,10 +1,12 @@
 ## PEP8
 
-\- python enhanced proposal - договорные правила между программистами по структурированию и стилизации кода.
+\- python enhanced proposal – это руководство по написанию кода на языке Python,
+которое содержит стандарты оформления кода для удобства чтения и поддержки проектов.
 
-* отступ в 4 пробела
-* между функциями две путые строки
-* snake_case
+* имена должны быть понятными и описательными, состоящие из букв, цифр и подчеркивания (snake_case)
+* отступы должны быть 4 пробелами, а не табуляцией
+* между функциями две пустые строки
+
 
 ```shell
 python -m pip install flake8
@@ -79,7 +81,12 @@ strings = ['12', '12a', 'a12']
 pattern = r'\d{2}'
 
 print(re.findall(pattern, string))  # ['12', '32']
-result = re..search(pattern, string)  # <re.Match object; span=(0, 2), match='12'> 
+result = re.search(pattern, string)  # <re.Match object; span=(0, 2), match='12'> 
+
+# найти все пересекающиеся вхождения
+pattern = re.compile('(?=(abab))')  # positive lookahead 
+for match in re.finditer(pattern, 'abababab'):
+    print(match.start())  # 0, 2, 4
 
 regex: re.Pattern = re.compile(pattern)
 # search - любое совпадение

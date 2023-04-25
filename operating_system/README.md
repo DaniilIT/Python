@@ -229,6 +229,7 @@ with open(file_path, 'w') as file:
 # 'b' -  бинарный режим
 
 with open(file_path, 'r') as file:
+    # line = file.readline()
     for line in file:
         print(line.rstrip())
 ```
@@ -238,12 +239,13 @@ with open(file_path, 'r') as file:
 
 \- процесс преобразования структуры данных в последовательность битов.
 
-### json
+### JSON
+
+\– это формат сериализации в текстовый формат.
 
 ```python
-import json
+import json, pickle
 from sys import stderr
-
 
 def upload_json(json_path):
     json_content = []
@@ -252,15 +254,26 @@ def upload_json(json_path):
             json_content = json.load(json_file)
     except FileNotFoundError:
         stderr.write(f"failed to find {json_path}.\n")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError:  # pickle.UnpicklingError
         stderr.write(f"failed to decode {json_path}.\n")
     return json_content
-
 
 def download_json(json_path, json_content):
     with open(json_path, 'w') as json_file:
         json.dump(json_content, json_file, indent=2, ensure_ascii=False)
 ```
+
+Типы данных:
+* строка (только двойные кавычки)
+* число
+* объект JSON
+* массив
+* boolean (true, false)
+* null
+
+Если нужно передать другие типы данных, то вместо json используется `pickle`,
+который сериализует в бинарный формат.
+
 
 ### [marshmallow](https://marshmallow.readthedocs.io/en/stable/index.html)
 

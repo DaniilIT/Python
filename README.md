@@ -77,7 +77,8 @@ print(s.upper())  # AB-ABA
 print(s.lower())  # ab-aba
 
 print(s.count('a'))  # 2
-print(s.find('a'))  # 0  # rfind - с конца
+print(s.find('a'))  # 0  # возможно -1  # rfind - с конца
+print(s.index('a'))  # 0  # возможно ValueError
 print(s.replace('a', 'c'))  # cb-cbA
 ```
 
@@ -131,6 +132,9 @@ b = b'\x01\x02\x03\x04'
 
 > неизменяемые списки
 
+Кортежи обычно используются для хранения и передачи неизменяемых данных,
+например, координаты точки на плоскости.
+
 ```python
 t = (1, 'Daniil')
 t.count(1)  # 1
@@ -167,12 +171,21 @@ hash(fs)  # TypeError
 l = [1, 2, 'Daniil']
 l.append(3)  # добавление в конец
 l.extend([4, 5])
-print(l.pop())  # удаление с конца
-l.remove('Daniil')
+l.insert(2, 'el')  # вставка
+print(l.pop())  # удаление с конца, возможно IndexError
+l.remove('Daniil')  # возможно ValueError
 
-for ind, val in enumerate(l):
-    pass
+l.sort(reverse=True)  # на месте
+# Отсортировать список, в котором есть и числа, и значения, через функцию
+l = sorted(l, key = lambda x: (isinstance(x, str), x))
+
+for idx, value in enumerate(l):
+    print(idx, value)
 ```
+
+```python
+# Отсортировать список, в котором есть и числа, и значения.
+l = sorted(l, key = lambda x: (isinstance(x, str), x))
 
 > **List Comprehensions** - способ создать список на основе последовательности.
 
@@ -185,13 +198,15 @@ squares = [i**2 for i in range(1, 11) if i % 2 == 0]  # [4, 16, 36, 64, 100]
 > Массивы хранят элементы одного и того же типа
 
 ```python
-import array
-a = array.array('i', [1, 2, 3, 4]) 
+import array as arr
+a = arr.array('i', [1, 2, 3, 4]) 
 ```
 
 - #### deque (очереди)
 
 > двусвязный список
+
+list - LIFO (стек), deque - FIFO.
 
 ```python
 from collections import deque
@@ -212,6 +227,9 @@ a = bytearray([12, 8, 25])
 2) ### set (множества)
 
 > неупорядоченная коллекция уникальных хэшируемых элементов
+
+Множества предпочтительно использовать для решения задач, связанных с уникальностью элементов,
+например, удаление дубликатов из списка, проверка пересечения элементов в нескольких списках и т.д.
 
 ```python
 s = {1, 2, 3}
@@ -236,7 +254,7 @@ print(a.issuperset(b))  # True
 
 3) ### dict (словари)
 
-> хэш-таблица - неупорядоченный набор пар ключ / значение (ключи — уникальные хэшируемые объекты)
+> подобная хэш-таблице структура - неупорядоченный набор пар ключ / значение (ключи — уникальные хэшируемые объекты)
 
 ```python
 A = {'name': 'Daniil', 'age': 26}
@@ -244,10 +262,11 @@ A['height']  # KeyError
 A.get('height', 176)
 
 A.update({'s': 'sa'})
-print(A.pop('s'))  # 'sa'
+del A['s']  # возможно KeyError
+print(A.pop('s'))  # 'sa'  # возможно KeyError
 
-for key, val in A.items():
-    pass
+for key, value in A.items():  # keys() + values()
+    print(key, value)
 ```
 
 - #### OrderedDict (упорядоченный словарь)
