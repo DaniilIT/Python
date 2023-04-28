@@ -1,6 +1,6 @@
 # ORM
 
-**Object Relational Mapper** - паттерн, для абстрагирования от реализации DBMS (СУБД) автоматизированно переводящий поля DB в поля класса и выполняющий SQL-запросы посредством методов класса.
+**Object Relational Mapper** – паттерн, для абстрагирования от реализации DBMS (СУБД) автоматизированно переводящий поля DB в поля класса и выполняющий SQL-запросы посредством методов класса.
 
 **DB** $\Leftrightarrow$ **СУБД** $\Leftrightarrow$ **SQL-запросы** $\Leftrightarrow$ **ORM** $\Leftrightarrow$ **app**
 
@@ -11,10 +11,10 @@
 
 ## [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/latest/)
 
-\- расширение для Flask, добавляющее поддержку SQLAlchemy.
+– расширение для Flask, добавляющее поддержку SQLAlchemy.
 
-```
-pip install flask flask-sqlalchemy sqlalchemy
+```sh
+python -m pip install flask flask-sqlalchemy sqlalchemy
 ```
 
 
@@ -28,12 +28,12 @@ pip install flask flask-sqlalchemy sqlalchemy
 * Oracle: cx-Oracle
 * MS SQL: PyODBC
 
-**DSN** - Data Source Name - строка подключения к данным.
+**DSN** - Data Source Name – строка подключения к данным.
 
 ```
 dialect+driver://username:password@hostname:port/database
 
-sqlite:///dbname.db
+sqlite:///dbname.db (sqlite:///:memory:)
 mysql+pymysql://root:***@localhost/dbname
 postgresql+psycorg2://localhost/dbname
 oracle+cx_oraccle://root:***@localhost/dbname
@@ -41,17 +41,7 @@ mssql+pyodbc://root:***@localhost/dbname
 ```
 
 
-### Типы данных
-
-| **SQL** | **SQLAlchemy** |
-| :---: | :---: |
-| BOOLEAN | Boolean |
-| INTEGER | Integer |
-| NUMERIC | Numeric |
-| FLOAT | Float |
-| TEXT | Text |
-| DATE | Date |
-| DATETIME | DateTime |
+### [Типы данных](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#mapped-column-derives-the-datatype-and-nullability-from-the-mapped-annotation)
 
 
 ## пример
@@ -62,7 +52,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # DB создасться в оперативной памяти
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # отключение сигналов об изменениях
 
 # db.init_app(app)
 db = SQLAlchemy(app)
@@ -82,8 +72,11 @@ with app.app_context():
     user1 = User(id=1, name='username1')
     user2 = User(id=2, name='username2')
     
+    # db.session.add(user1)
+    # db.session.commit(user1)
+    # db.session.close()
+    
     with db.session.begin():
-        # db.session.add(user1)
         db.session.add_all([user1, user2])
 ```
 
@@ -95,7 +88,7 @@ with app.app_context():
 users = User.query.all()
 users_count = User.query.count()
 
-user1 = User.qury.all().first()
+user1 = User.query.all().first()
 user1_json = json.dumps({
     'id': user.id,
     'name': user.name,
@@ -103,6 +96,15 @@ user1_json = json.dumps({
 user2 = User.query.get(2)  # primary key
 # user2 = User.query.filter(User.id == 2).first()  # тоже самое
 # user2 = User.query.filter(User.id == 2).one()  # вызовет except, если нет объекта
+```
+
+```python
+import prettytable
+
+session = db.session()
+cursor = session.execute(f'SELECT * FROM {User.__tablename__}').cursor
+my_table = prettytable.from_db_cursor(cursor)
+my_table.max_width = 30
 ```
 
 
@@ -116,8 +118,9 @@ class User(db.Model):
     name = db.Column(db.String(40), nullable=False)
     login = db.Column(db.String(40), unique=True)
     age = db.Column(db.Integer, db.CheckConstraint('age >= 18'), default=18)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL')
+    updated = db.Column(db.DateTime, onupdate=datetime.utcnow)
     
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL')  # CASCADE
     group = db.relationship('Group')
     
     def __repl__():
@@ -138,7 +141,7 @@ class Group(db.Model):
 
 ```python
 with app.app_context():
-    user1 = User(id=1, name='username1')
+    user1 = User(id=1, ...')
     group1 = Group(id=1, name='groupname1', users=[user1])
     
     db.session.add(group1)
@@ -154,7 +157,7 @@ with app.app_context():
     
 with app.app_context():
     user_with_group = User.query.get(1)
-    print(user_wuth_group.group.name)
+    print(user_with_group.group.name)
 ```
 
 ***
@@ -200,7 +203,7 @@ users = query.all()
 ---
 
 ```python
-filter(User.name.like('D%'))
+filter(User.name.like('D%'))  # ilike
 filter(User.name.in_([1, 2]))
 filter(User.name.notin_([1, 2]))
 filter(User.name.between(1, 5))
@@ -250,7 +253,24 @@ SELECT user.name, group.name AS grp_name FROM user OUTER JOIN group ON user.grou
 users = db.session.query(User.name, Group.name.label('grp_name')).outerjoin(Group).all()
 ```
 
+
 ### Группировка
+
+```sql
+SELECT group.name, COUNT(user.group_id) AS count FROM "group"
+OUTER JOIN "user" ON "group".id = "user".group_id
+GROUP BY "group".name
+```
+
+```python
+# count, sum, ...
+db.session.query(Group.name, db.func.count(User.group_id)).outerjoin(User, Group.id == User.group_id).group_by(Group.name).all()
+# [(_,_), (_,_), ...]
+```
+
+---
+
+
 
 ```sql
 SELECT COUNT(group.id) AS count_1 FROM user
@@ -261,7 +281,8 @@ GROUP BY "group".id
 
 ```python
 from sqlalchemy import func
-# func.column(User.id)  - count(user.id)
+# func.column(User.id) – count(user.id)
+# func.lower(Student.name)
 query = db.session.query(func.column(User.id)).join(Group).filter(Group.id == 1).group_by(Group.id)
 num = query.scalar()
 ```
@@ -353,19 +374,18 @@ with db.session.begin():
 
 ## Миграция
 
-\- процесс изменения структуры DB. (~ ALTER TABLE)\
-\- файл со списком запросов для обновления DB.
+– процесс изменения структуры DB. (~ ALTER TABLE)\
+– файл со списком запросов для обновления DB.
 
 **Flask-Migrate** $\leftarrow$ **Alembic**
 
-```
-pip install Flask-Migrate
+```sh
+python -m pip install Flask-Migrate
 ```
 
 ```python
 from flask_migrate import Migrate
 
-#
 migrate = Migrate(app, db, render_as_batch=True)  # render_as_batch - настройка, чтобы sqlite3 мог удалять/добавлять колонки
 ```
 
