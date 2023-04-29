@@ -479,6 +479,7 @@ data/
 
 config.py (DevelopmenConfig, ProductionConfig)
 app.py
+setup_db.py
 requirements.txt
 .env
 .gitignore
@@ -503,4 +504,15 @@ candidates_dao = CandidatesDAO('./data/candidates.json')
 def candidate_page(pk):
     candidate = candidates_dao.get_by_id(pk)
     return render_template('candidates_single.html', candidate=candidate)
+```
+
+### feature
+
+```
+@app.route("/someplace", strict_slashes=False)
+=
+@app.route("/someplace/")
+@app.route("/someplace")
+=
+app.url_map.strict_slashes = False
 ```

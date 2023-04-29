@@ -1,13 +1,13 @@
 # [Flask-RESTX](https://flask-restx.readthedocs.io/en/latest/index.html)
 
-\- расширение для Flask, добавляющее поддержку быстрого создания RESTful-сервиса, основанную на Class Based View.
+– расширение для Flask, добавляющее поддержку быстрого создания RESTful-сервиса, основанную на Class Based View.
 
-**Class Based View** - это способ оформения views (представлений) в виде класса.
+**Class Based View** - это способ оформения views (представлений) в виде класса, с методами get, post, put, patch, delete.
 
 <img src="images/flask_restx.png" alt="logo flask-restx" title="Logo flask-restx" style="height: 380px;" />
 
 ```
-pip install flask-restx
+python -m pip install flask-restx
 ```
 
 ```python

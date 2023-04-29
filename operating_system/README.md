@@ -283,7 +283,7 @@ def download_json(json_path, json_content):
 pip install marshmallow
 ```
 
-типы полей: Bool, Int, Decimal (число с фиксированной точностью), Float, DataTime, Str, Email и т. д.
+типы полей: Bool, Int, Decimal (число с фиксированной точностью), Float, DataTime, Str, Email [и т. д.](https://marshmallow.readthedocs.io/en/stable/_modules/marshmallow/fields.html)
 
 ```python
 from marshmallow import Schema, fields
@@ -294,6 +294,7 @@ class User(db.Model):
     name = db.Column(db.String)
     age = db.Column(db.Integer)
 
+# Схема - описание полей сложной структуры.
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
@@ -313,6 +314,41 @@ users_json = user_schema.dumps([user1, user2])
 s = '{"name": "C", "age": 26}'
 user_dict = user_schema.loads(s)
 user = User(**user_dict)
+```
+
+### prettytable
+
+```python
+import prettytable as pt
+
+my_table = pt.PrettyTable()
+my_table.max_width = 40
+
+columns = ['id', 'col_1', 'col_2']
+my_table.field_names = columns
+
+rows = [
+  (1, 'A', True),
+  (2, 'B', True),
+  (3, 'C', False),
+]
+my_table.add_rows(rows)
+my_table.add_row((4, 'D', True))
+
+print('my_table:')
+print(my_table)
+```
+
+```
+my_table:
++----+-------+-------+
+| id | col_1 | col_2 |
++----+-------+-------+
+| 1  |   A   |  True |
+| 2  |   B   |  True |
+| 3  |   C   | False |
+| 4  |   D   |  True |
++----+-------+-------+
 ```
 
 
