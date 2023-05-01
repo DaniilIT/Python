@@ -35,6 +35,15 @@
 
 С помощью запроса по **DNS** протоколу провайдер сообщает IP адрес.
 
+Сделать запрос в терминале ([curl](https://losst.pro/kak-polzovatsya-curl), [netcat](https://losst.pro/komanda-nc-v-linux)):
+
+```sh
+curl -i -X POST -H 'Content-Type: application/json' -d '{"name": "New item", "year": "2009"}' <url>
+curl --help all
+
+nc localhost 5000
+```
+
 <img src="images/requests.webp" alt="Logo requests" title="logo requests" style="height: 380px;" />
 
 Методы запросов:
@@ -91,23 +100,23 @@ def main():
 Код состояния HTTP:
 
 1. **Informational**\
-    *102 Processing (в обработке) - сервер получил запрос;
+    * 102 Processing (в обработке) - сервер получил запрос;
 2. **Success**\
-    *200 OK - сервер успешно обработал запрос;\
-    *201 Created - сервер успешно создал ресурс;\
-    *204 No Response - ответ для PUT, PATCH;
+    * 200 OK - сервер успешно обработал запрос;\
+    * 201 Created - сервер успешно создал ресурс;\
+    * 204 No Response - ответ для PUT, PATCH;
 3. **Redirection**\
-    *301 Moved Permanently (перемещен на постоянной основе) - URI ресурса был изменен (напр: подставляет '/' в конец);\
-    *302 Found (найдено) - ресурс временно изменен (напр: пересылка на главную страницу);
+    * 301 Moved Permanently (перемещен на постоянной основе) - URI ресурса был изменен (напр: подставляет '/' в конец);\
+    * 302 Found (найдено) - ресурс временно изменен (напр: пересылка на главную страницу);
 4. **Client Error**\
-    *400 Bad Request - ;\
-    *401 Unauthorized - нет доступа без аутентификации;\
-    *403 Forbidden - нет доступа с аутентификацией как у клиента;\
-    *404 Not Found - сервер не может найти запрашиваемый ресурс;\
-    *405 Method Not Allowed - сервер получил запрос с методом, который не ожидал (GET и HEAD разрешены всегда);
+    * 400 Bad Request - ;\
+    * 401 Unauthorized - нет доступа без аутентификации;\
+    * 403 Forbidden - нет доступа с аутентификацией как у клиента;\
+    * 404 Not Found - сервер не может найти запрашиваемый ресурс;\
+    * 405 Method Not Allowed - сервер получил запрос с методом, который не ожидал (GET и HEAD разрешены всегда);
 5. **Server Error**\
-    *500 Internal Server Error - ошибка сервиса;\
-    *503 Service Unavailable - сервер временно перегружен или на тех. обслуживании;
+    * 500 Internal Server Error - ошибка сервиса;\
+    * 503 Service Unavailable - сервер временно перегружен или на тех. обслуживании;
 
 ---
 

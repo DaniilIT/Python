@@ -88,6 +88,13 @@ time.sleep(1)  # пауза 1с.
 print(f'Program time: {time.monotonic() - start:.3f}' + " seconds.")
 ```
 
+Измерить время выполнения скрипта:
+
+```sh
+time main.py
+```
+
+
 ## te quiero demasiado
 
 ```python
