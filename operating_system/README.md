@@ -139,6 +139,8 @@ sys.exit(0)  # выход из python
 
 ### logging
 
+Логирование – записи действий, вызванных пользователями.
+
 ```python
 import logging
 logging.basicConfig(filename='app.log', filemode='w', level=logging.INFO,
