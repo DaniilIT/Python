@@ -60,10 +60,12 @@ python -m pip install pytz
 
 ```python
 import pytz
+from datetime import timezone as tz
 
-dt_now = dt.datetime.utcnow()  # 2023-04-26 08:35:06.271916 <class 'datetime.datetime'>
-dt_utc_now = pytz.utc.localize(dt_now)  # 2023-04-26 08:35:06.271916 <class 'datetime.datetime'>
-dt_now = dt.datetime.now(pytz.utc)  # 2023-04-26 08:35:06.271995+00:00 <class 'datetime.datetime'>
+dt_now = dt.datetime.utcnow()  # 2023-04-26 08:35:06.271916
+dt_utc_now = pytz.utc.localize(dt_now)  # 2023-04-26 08:35:06.271916+00:00
+dt_utc_now = dt.datetime.now(tz=tz.utc)  # 2023-04-26 08:35:06.271916+00:00
+dt_now = dt.datetime.now(tz=pytz.utc)  # 2023-04-26 08:35:06.271916+00:00
 
 print(pytz.all_timezones)  # ['America/New_York', 'Etc/GMT+3', 'Europe/Moscow', ...]
 print(pytz.country_timezones('RU'))  # ['Europe/Moscow', ...]

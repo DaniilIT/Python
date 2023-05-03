@@ -59,6 +59,10 @@ echo 'Hi' > file.txt
 ':w' сохранить\
 ':wq' выйти с сохранением
 
+```sh
+pip install --upgrade pip
+```
+
 
 ### os
 
