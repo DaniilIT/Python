@@ -1,16 +1,16 @@
 # [PYTEST](https://docs.pytest.org/en/latest/)
 
-\- стандарт в написании автоматических тестов.
+– стандарт в написании автоматических тестов.
 
 <img src="images/pytest.svg" alt="logo pytest" title="Logo pytest" style="height: 380px;" />
 
-Exceptions (исключения) - ошибки, возникающие в ходе выполнения программы.
+Exceptions (исключения) – ошибки, возникающие в ходе выполнения программы.
 
 <div align="center"> [BaseException] </div>
 
 $$\Downarrow$$
 
-<div align="center"> [Exception] &emsp; [SystemExit] &emsp; [KeyboardInterrupt] </div>
+<div align="center"> **[Exception]** &emsp; [SystemExit] &emsp; [KeyboardInterrupt] </div>
 
 $$\Downarrow$$
 
@@ -21,18 +21,17 @@ $$\Downarrow$$
 
 ```python
 class MyException(Exception):
-    # pass
-    def __init__(self, message=None):
+    def __init__(self, message=None):  # pass
         super().__init__(message)
         self.message = message
 
 try:
     a = int(input('a = '))
     if a % 2:
-        raise MyException("even number expected")
+        raise MyException("expected an even number")
     b = 100 / a
 except (ZeroDivisionError, ValueError) as error:
-    print(error) # invalid literal for int() with base 10: ''
+    print(error)
 except MyException:
     raise # проброс наверх
 else: # для цикла выполнится, если не прервался с break
@@ -41,29 +40,30 @@ finally:
     print('конец')
 ```
 
+
 ## тестирование
 
-1. Unit - модульное тестирование функций и классов. - быстрые, легкие и дешевые.
-2. Интеграционное - тестирование связи с внешними источниками, API, баз данных.
-3. UI - тестирование производительности, защищенности и надежности.
+1. Unit – модульное тестирование функций и классов. - быстрые, легкие и дешевые.
+2. Интеграционное – тестирование связи с внешними источниками, API, баз данных и т. д.
+3. UI – нефункциональное тестирование производительности, защищенности и надежности.
 
 
-## Assert
+### Assert
 
 ```python
 assert 2 + 2 == 4, 'count is wrong'
 # (if False) AssertionError: count is wrong
 ```
 
-```
+```sh
 OPTIMIZE - отключает проверку условий assert
 python -O main.py
 ```
 
 ***
 
-```
-pip install pytest
+```sh
+python -m pip install pytest
 ```
 
 * pytest собирает по всему дереву проекта файлы, функции и классы похожие на тесты:\
@@ -87,13 +87,14 @@ def test_my_function_3():
 ```
 
 Запуск:
-```
+
+```sh
 pytest
 # или (можно без tests/__init__.py)
 python -m pytest
 
 pytest -v  # подробный вывод (verbose)
-pytest -s  # вывод print
+pytest -s  # включить вывод print
 ```
 
 
@@ -155,6 +156,23 @@ class TestGetCircleSquare:
             get_circle_square(radius)
 ```
 
+### Пропуск теста
+
+```python
+@pytest.mark.skip(reason="ok")
+    def test_skip(self):
+        raise Exception()
+```
+
+### Ожидание выброса исключения
+
+```python
+@pytest.mark.xfail(strict=True, raises=Exception)
+    def test_have_to_fail():
+        raise Exception()
+```
+
+
 ## Тестируем класс
 
 ```python
@@ -191,7 +209,7 @@ class TestCircle:
 
 ## Фикстурa
 
-\- функция, которая выполняется до тестирования (и после) для подготовки данных. 
+– функция, которая выполняется до тестирования (или после) для подготовки данных. 
 
 ```python
 # conftest.ру
@@ -221,20 +239,13 @@ def some_do():
     yield
     ...  # выполняется после тестов
     
-@pytest.fixture(scope='function / class / module/ session')  # выполняется для функций / классов / модулей / один раз за всё тестирование
-```
-
-### Дополнительные декораторы
-
-```python
-@pytest.mark.skip(reason='ok')  # пропуск теста
-@pytest.mark.xfail()  # указывает на ожидание неправильного результата
+@pytest.fixture(scope='function / class / module / session')  # выполняется для функций / классов / модулей / один раз за всё тестирование
 ```
 
 
 ## DAO
 
-**Data Access Object** - объект для доступа к данным из файлов, базы данных или сторонних сервисов.
+**Data Access Object** – объект для доступа к данным из файлов, базы данных или сторонних сервисов.
 
 ```python
 # dao/candidate.ру
@@ -365,11 +376,10 @@ class TestMain:
 
 ## Моки
 
-**service** - слой бизнес логики, который работает с предметной областью.
+**service** – слой бизнес логики, который работает с предметной областью.
 
-**мокированный класс** - класс с методами, при вызове которых происходит не то что в них написано, а то чтонужно для тестов.
-
-\- нужны для симуляции работы с тем, чего нет в локальном окружении, например с DB или внешним сервисом.
+**мокированный класс** – класс с методами, при вызове которых происходит не то что в них написано, а то что нужно для тестов.\
+Они нужны для симуляции работы с тем, чего нет в локальном окружении, например с DB или внешним сервисом.
 
 ```python
 # tests/services/test_user

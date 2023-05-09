@@ -37,7 +37,8 @@ sqlite:///dbname.db (sqlite:///:memory:)
 mysql+pymysql://root:***@localhost/dbname
 postgresql+psycorg2://localhost/dbname
 oracle+cx_oraccle://root:***@localhost/dbname
-mssql+pyodbc://root:***@localhost/dbname
+mysql+mysqlconnector://root:***@localhost/dbname
+mssql+pyodbc://root:***@localhost/dbname  # работает с разными DB
 ```
 
 
@@ -49,13 +50,16 @@ mssql+pyodbc://root:***@localhost/dbname
 ```python
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # DB создасться в оперативной памяти
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # отключение сигналов об изменениях
+app.config['SQLALCHEMY_ECHO'] = True  # логирование запросов
 
-# db.init_app(app)
 db = SQLAlchemy(app)
+# db.init_app(app)
 
 # Модель
 class User(db.Model):
@@ -72,9 +76,13 @@ with app.app_context():
     user1 = User(id=1, name='username1')
     user2 = User(id=2, name='username2')
     
-    # db.session.add(user1)
-    # db.session.commit(user1)
-    # db.session.close()
+    try:
+        db.session.add(user1)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+    fynally:
+        db.session.close()
     
     with db.session.begin():
         db.session.add_all([user1, user2])
@@ -84,6 +92,7 @@ with app.app_context():
 ### Получение данных
 
 ```python
+# with app.app_context():
 # users = db.session.query(User).all()
 users = User.query.all()
 users_count = User.query.count()
@@ -94,8 +103,9 @@ user1_json = json.dumps({
     'name': user.name,
 })
 user2 = User.query.get(2)  # primary key
+# user2 = db.session.get(User, 2)
 # user2 = User.query.filter(User.id == 2).first()  # тоже самое
-# user2 = User.query.filter(User.id == 2).one()  # вызовет except, если нет объекта
+# user2 = User.query.filter(User.id == 2).one()  # вызовет except, если нет объекта или объектов несколько
 ```
 
 ```python
@@ -120,7 +130,7 @@ class User(db.Model):
     age = db.Column(db.Integer, db.CheckConstraint('age >= 18'), default=18)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow)
     
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL')  # CASCADE
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL')
     group = db.relationship('Group')
     
     def __repl__():
@@ -134,6 +144,36 @@ class Group(db.Model):
     name = db.Column(db.String(40))
     
     users = db.relationship('User')
+```
+
+
+### ManyToMany
+
+```python
+post_tags = db.Table('post_tags',
+					 db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE')),
+					 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id', ondelete='CASCADE'))
+					)
+					
+# >>> with app.app_context():
+# ...     tag1 = Tag.query.first()
+# ...     post1 = Post.query.filter(Post.id==1).first()
+# ...     post1.tags.append(tag1)
+# ...     db.session.commit()
+# >>> with app.app_context():
+# ...     post1 = Post.query.filter(Post.id==1).first()
+# ...     print(post1.tags)  # [<Tag id: 1>]
+# >>> with app.app_context():
+# ...     tag1 = Tag.query.first()
+# ...     print(tag1.posts.all())  # [<Post id: 1>]
+
+class Post(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	tags = db.relationship('Tag', secondary=post_tags,
+		                   backref=db.backref('posts', lazy='dynamic'))  # lazy - возвразает query для дальнейшей обработки
+
+class Tag(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
 ```
 
 
@@ -169,11 +209,10 @@ SELECT * FROM user WHERE age < 30
 ```
 
 ```python
-# query = db.session.query(User).filter(User.age < 30)
+# query = db.session.query(User).filter(User.age == 18)
 query = User.query.filter(User.age < 30)
 # print(query)  # получить сырой текст запроса
 users = query.all()
-user1_name = query.one().name  # вызовет исключение, если список пустой
 user1_name = query.first().name
 ```
 
@@ -197,6 +236,7 @@ SELECT * FROM user WHERE age < 24 OR name IS NONE
 ```python
 from sqlalchemy import or_
 query = db.session.query(User).filter(or_(User.age < 24, User.name == None))
+# posts = Post.query.filter(Post.title.contains(q) | Post.body.contains(q))
 users = query.all()
 ```
 
@@ -229,6 +269,7 @@ SELECT * FROM user ORDER BY age DESC
 from sqlalchemy import desc
 users = db.session.query(User).order_by(User.age).all()  # ASC
 users = db.session.query(User).order_by(desc(User.age)).all()
+# posts = Post.query.order_by(Post.created.desc()).all()
 ```
 
 
@@ -372,15 +413,15 @@ with db.session.begin():
 
 ***
 
-## Миграция
+## Миграции
 
 – процесс изменения структуры DB. (~ ALTER TABLE)\
 – файл со списком запросов для обновления DB.
 
-**Flask-Migrate** $\leftarrow$ **Alembic**
+**Alembic** $\rightarrow$ **Flask-Migrate**
 
 ```sh
-python -m pip install Flask-Migrate
+python -m pip install flask-migrate
 ```
 
 ```python
@@ -389,9 +430,10 @@ from flask_migrate import Migrate
 migrate = Migrate(app, db, render_as_batch=True)  # render_as_batch - настройка, чтобы sqlite3 мог удалять/добавлять колонки
 ```
 
-```
+```sh
 flask db init
-flask db migrate -m 'add user.role, group.status'  <!-- создать миграцию -->
-flask db upgrade  <!-- накатить -->
+flask db migrate -m 'add user.role, group.status'  # создать миграцию
+# если flask не видит модели, то можно импортировать их в `/migrations/env.py`
+flask db upgrade  # накатить
 flask db downgrade  <!-- откатить -->
 ```

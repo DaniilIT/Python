@@ -99,9 +99,9 @@ access_token имеет непродолжительное время жизни
 
 ## Реализация
 
-<img src="images/schema.png" alt="schema" title="schema" style="height: 380px;" />
+Пример аутентификации, без регистрации.
 
-Пример с auth, без регистрации.
+<img src="images/schema.png" alt="schema" title="schema" style="height: 380px;" />
 
 ### модель
 
@@ -195,7 +195,7 @@ class UserService:
         # hash_digest = hashlib.md5(password.encode('utf-8')).hexdigest()
         # return hash_digest.decode('utf-8', 'ignore')
         hash_digest = self.get_hash_digest(password)
-        return base64.b64encode(hash_digest)
+        return base64.b64encode(hash_digest).decode('utf-8')
     
     def compare_passwords(self, password_hash, other_password) -> bool:
         return hmac.compare_digest(

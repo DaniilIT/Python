@@ -1,13 +1,13 @@
 # [Flask](https://flask.palletsprojects.com/en/latest/)
 
-\- микрофреймворк для создания веб приложения.
+– микрофреймворк для создания веб приложения.
 
 <img src="images/flask.webp" alt="logo flask" title="Logo flask" style="height: 240px;" />
 
-*Модуль* - это файл, который содержит исполняемый код на python.\
-*Пакет* - набор модулей, папка, которая содержит файл init.py в качестве флага.\
-*Библиотека* - набор пакетов.\
-**Фреймворк** - набор готовых компонентов (библиотек), из которых формируется приложение.
+*Модуль* – это файл, который содержит исполняемый код на python.\
+*Пакет* – набор модулей, папка, которая содержит файл `__init__.py` в качестве флага.\
+*Библиотека* – набор пакетов.\
+**Фреймворк** – набор готовых компонентов (библиотек), из которых формируется приложение.
 
 $\Leftrightarrow$ [Веб-приложение] $\Leftrightarrow$ [WSGI-сервер] $\Leftrightarrow$ [Flask-приложение]
 
@@ -20,7 +20,7 @@ Flask включает в себя работу с:
 * cookies и сессиями
 * тестами
 
-```bash
+```sh
 pip install Flask
 ```
 
@@ -43,13 +43,15 @@ if __name__ == '__main__':  # для команды flask не нужно
     app.run(debug=True)
 ```
 
+Если app и views написаны отдельно, то достаточно указать: `from app import app` и `import views`.
+
 Если не ставить в конце маршрута '/', будут обрабатываться только адреса без '/'.\
 Если ставить - при запросе без '/', будет перенаправление (код 308) на маршрут с '/'.
 
-**Эндпоинт** - маршрут с указанием метода HTTP-запроса. Маршрут (URL) может иметь несколько эндпоинтов.\
-**View** (представление) - функция, которая обрабатывает запрос.
+**Эндпоинт** – маршрут с указанием метода HTTP-запроса. Маршрут (URL) может иметь несколько эндпоинтов.\
+**View** (представление) – функция, которая обрабатывает запрос.
 
-```bash
+```sh
 python арр.ру
 flask run --debug
 ```
@@ -57,28 +59,20 @@ flask run --debug
 
 ## PID
 
-**Process IDentifier** - уникальный номер процесса.
+**Process IDentifier** – уникальный номер процесса.
 
-Посмотреть запущенные процессы и отфильтровать: `ps aux | grep python`
+Посмотреть запущенные процессы и отфильтровать: `ps aux | grep python`.
 
-Посмотреть, свободен ли определенный порт: (List Of Opened Files) `lsof -i -P | grep :5000`
-```
->> Python 12058 daniil 4u IPv4 0xadf36d703ab2444f 0t0 TCP localhost:5000 (LISTEN)
-```
+Посмотреть, свободен ли определенный порт: (List Of Opened Files) `lsof -i -P | grep :5000`.
 
-Убить процесс по PID: `kill 12058` или:
-
-```bash
-kill -9 $(lsof -t -i:80)
-```
-
+Убить процесс по PID: `kill 12058` или `kill -9 $(lsof -t -i:5000)`.
 
 
 ## [Jinjа2](https://jinja.palletsprojects.com/en/latest/)
 
-\- html-шаблонизатор.
+– html-шаблонизатор.
 
-```bash
+```sh
 pip install Jinja2
 ```
 
@@ -111,10 +105,11 @@ server.watch('template.html', make_render)
 server.serve(root='.')
 ```
 
-**DOM-дерево** - иерархическое представление структуры html.
+**DOM-дерево** – иерархическое представление структуры html.
 
 template:
 ```html
+<a href="{{ url_for(blueprint_name.view_name, slug=slug_value) }}">{{ link_value  }}</a>
 <!-- {% for index in range(6) %} -->
 {% for category, drink in drinks.items() %}
     <p>{{ category }}</p>
@@ -154,10 +149,13 @@ template:
 
 
 ### SPA
-**Single Page Application** - сервер, который отдает JSON и шаблон, а шаблонизация происходит на стороне клиента.
+
+**Single Page Application** – сервер, который отдает JSON и шаблон, а шаблонизация происходит на стороне клиента.
 
 ```python
 from flask import Flask, render_template, jsonify
+
+CARDS = [{'name': 'Daniil'}]
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -165,12 +163,11 @@ app.config['DEBUG'] = True
 
 @app.route('/')
 def index_page():
-    return render_template('index.html', cards=cards)
+    return render_template('index.html', cards=CARDS)
 
 @app.route('/api/')
 def api_page():
-    data = {'name': 'Daniil'}
-    return jsonify(data)
+    return jsonify(CARDS)
 
 if __name__ == '__main__':
     app.run()
@@ -179,7 +176,7 @@ if __name__ == '__main__':
 
 ### Логирование
 
-\- ведение записей по важным для системы событиям.
+– ведение записей по важным для системы событиям.
 
 ```python
 import logging
@@ -203,7 +200,7 @@ INFO:werkzeug:127.0.0.1 - - [18/Feb/2023 16:04:37] "GET / HTTP/1.1" 200 -
 
 ### Обработка GET запросов
 
-**query параметры** - данные, которые передаются в GET-запросе в формате ключ-значение, например:\
+**query параметры** – данные, которые передаются в GET-запросе в формате ключ-значение, например:\
 `https://translate.google.ru/?sl=ru&tl=en&op=translate`
 
 ```html
@@ -310,7 +307,7 @@ def upload_page():
 ***
 
 
-**static** - единственная папка, доступная пользователям.
+**static** – единственная папка с файлами CSS, JS, картинками и шрифтами, доступная пользователям.
 
 Чтобы сделать содержимое другой папки доступным, нужно использовать специальную вьюшку:
 ```python
@@ -324,7 +321,7 @@ def staticdir(path):
 
 ## Blueprint
 
-\- самостоятельный модуль Flask-приложения.
+– самостоятельный модуль Flask-приложения, представляющий кусок изолированной функциональности.
 
 ```
 main/
@@ -337,7 +334,7 @@ main/
 # main/views.py
 from flask import Blueprint, render_template
 
-main_blueprint = Blueprint('main', __name__, template_folder='templates')
+main_blueprint = Blueprint('main', __name__, template_folder='templates')  # 'main' используется в url_for
 
 @main_blueprint.route('/')
 def index_page():
@@ -361,7 +358,8 @@ if __name__ == '__main__':
 ```python
 # profile/views.py
 
-profile_blueprint = Blueprint('profile', __name__, static_folder='static', template_folder='templates', url_prefix='/profile/')
+profile_blueprint = Blueprint('profile', __name__, static_folder='static', template_folder='templates',
+                                             url_prefix='/profile/')  # можно задать и в `app.register_blueprint(profile_blueprint, url_prefix='/profile/')`
 
 # /profile/
 @profile_blueprint.route('/')
@@ -395,7 +393,7 @@ pprint(dict(app.config))
 ```
 # .env
 APP_CONFIG=development
-# APP_CONFIG=preduction
+# APP_CONFIG=production
 ```
 
 ```python

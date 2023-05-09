@@ -131,7 +131,7 @@ FROM tname
 
 ```sql
 WHERE col1 < '2023-09-01'
-AND col2 BETWEN 10 AND 20  -- границы включены
+AND col2 BETWEEN 10 AND 20  -- границы включены
 AND col3 LIKE 'R%'  -- начинается с буквы R # % пропус подстроки # _ пропуск одного символа
 AND col4 IN ('A', 'B')
 AND col5 IS NOT NULL
