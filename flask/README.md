@@ -53,7 +53,7 @@ if __name__ == '__main__':  # для команды flask не нужно
 
 ```sh
 python арр.ру
-flask run --debug
+flask run --debug -h 0.0.0.0 -p 80
 ```
 
 
@@ -421,6 +421,8 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 # или
 app.config.from_object(Config_1())
+# или
+app.config.from_envvar('APP_SETTINGS', silent=True)
 # print(app.config.get('PATH'))
 
 app.app_context().push()

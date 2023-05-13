@@ -1,49 +1,57 @@
 # Docker
 
-\- это платформа для разработки и запуска контейнеров, которая позволяет запускать несколько изолированнх приложений внутри одной виртуальной машины.
+– это ПО для управления контейнерами, которое позволяет запускать несколько изолированнх приложений внутри одной виртуальной машины.\
+Запускается на Linux (или эмулирует её))
 
 <img src="images/docker.webp" alt="docker" title="docker" style="height: 240px;"/>
 
 
 ## Контейнеризация
 
-позволяет запускать процессы в изолированном окружении внутри ОС.
-
-**Контейнер** - это набор запущенных процессов, находящийся внутри собственного окружения.
+**Контейнер** – это приложение (набор запущенных процессов), которое изолировано от всех остальных.
 
 В ядре **Linux** для изоляции есть два инструмента:
-
-* **namespaces** - это абстракция над ресурсами в ОС. В настоящее время существует семь типов пространств имен: Cgroups, IPC, Network, Mount (файлы и каталоги), PID, User, UTS.
-* **Cgroups** - отвечает за управление потреблением ресурсов.
+* **namespaces** – (видимость) изолирует PID, Network, Mount (файлы и каталоги) и т. д.
+* **Cgroups** – (ресурсы) изолирует CPU, RAM и т. д.
 
 ### отличия от VM
 
-* VM использует гипервизор (ПО для запуска VM), который создает отдельные ОС выделяя им конкретную долю ресурсов.
-* Докер (кистема контейнеризации) использует инструменты основной ОС (без процесса виртуализации)
+* VM использует гипервизор (ПО для запуска VM), который создает отдельные  виртуализированные ОС, выделяя им конкретную долю ресурсов.\
+	обладает медленной загрузкой и ограниченными возможностями по миграции.
+* Docker (система контейнеризации) использует ресурсы основной ОС (без процесса виртуализации).\
 
-### Архитектура
+### архитектура
 
-- Docker daemon - (фоновый процесс) сервис, который осуществляет всё взаимодействие с контейнерами.
-- Docker client - интерфейс командной строки для управления Docker daemon.
+- Docker daemon – (фоновый процесс) сервис, который осуществляет всё взаимодействие с контейнерами.
+- Docker client – интерфейс командной строки для управления Docker daemon.
 
 
-## основный понятия
+## Основный понятия
  
- * **Docker image (образ)** - неизменяемый файл, из которого разворачиваются контейнеры.
+ * **Docker image (образ)** – неизменяемый файл, из которого разворачиваются контейнеры. (состоит из слоев)
  
-```bash
-docker images  :: показать локальные образы
-docker pull <img>  :: скачать образ из репозитория
-docker rmi <img> :: удалить образ
+```sh
+docker images  # показать локальные образы
+docker {image} pull <img>:<tag>  # скачать образ из reqistry
+docker {image} inspect <img>  # посмотреть слои образа и др. метаданные
+docker {image} rm <img> # удалить образ # docker rmi <img>
 ```
 
-* **Docker Registry** - хранилище с докер-образами. Чтобы каждый раз не собирать образ, его можно отправить в репозиторий, например Docker Hub. Платные - Docker Registry, Nexus, Harbor, Artifactory.
+* **Docker Registry** – хранилище с докер-образами. Чтобы каждый раз не собирать образ, его можно отправить в репозиторий, например Docker Hub. Платные - Docker Registry, Nexus, Harbor, Artifactory.
 
-* **Dockerfile** - инмтрукция для сборки образа. Текстовый файл с командами, в котором указаны все зависимости.
+* **Dockerfile** – Текстовый файл с пошаговыми инмтрукциями для создания образа.
 
-```Docker
-# ./docker
-From python:3
+* **FROM** – базовый слой
+* **RUN** – выполнить команду при сборке контейнера (создание нового слоя)
+* **WORKDIR** – сменить базовую директорию
+* **ENV** – пробросить переменную окружения
+* **ARG** – параметры сборки
+* **COPY** – копирование файлов
+* **CMD** –  команда при старте контейнера
+
+```Dockerfile
+# ./Dockerfile
+FROM python:3.11
 
 RUN apt update && apt -y install gettext-base
 WORKDIR /code
@@ -54,116 +62,167 @@ COPY . .
 CMD ["python", "./main.py"]  # ./run.sh
 ```
 
-создать образ из Dockerfile:
-```bash
-docker build -t my_image .
+```sh
+# run.sh
+python ./main.py
 ```
 
-* **FROM** - базовый образ
-* **RUN** - выполнить команду
-* **WORKDIR** - сменить базовую директорию
-* **ENV** - пробросить переменные окружения
-* **ARG** - параметры сборки
-* **COPY** - копирование файлов
-* **CMD** -  команда при старте контейнера
-
-```
-# ./docker
+```Dockerfile
+# ./Dockerfile
 FROM ubuntu:20.04
 RUN apt update && apt install -y nginx
 CMD nginx -g 'deamon off;'
 ```
 
+создать образ из Dockerfile:
+```sh
+docker {image} build -t <img> .
+```
+
+`.dockerignore` - перечисление файлов и каталогов, которые не будут включены в образ.
+
 
 ## Контейнеры
 
-Запуск контейнера:
-```bash
-docker run my_image
-docker run -p 8080:80 my_image  :: переброс портов
-docker run docker/getting-started  :: обучающий веб-сервис
-docker run -d nginx  :: запуск в фоновом режиме
-docker run nginx:1.20  :: зауск конкретной версии веб-сервиса для раздачи статики
+Запуск контейнера из образа:
+```sh
+docker {container} run --name=<conatiner> <img>  # --rm удалит контейнер при его остановке
+docker run -p 80:80 docker/getting-started  # обучающий веб-сервис  # проброс портов (на мaшине : в контейнере)
+docker run -p 80:80 -d nginx:1.20  # зауск в фоновом режиме конкретной версии nginx
 ```
 
- в этот момент
-* инициализируется файловая система
-* выдается IP-адрес внутри сети докера
-* запускается команда `CMD` из Dockerfile и ей выдается PID 1
+**NGINX** – (др. Apache) веб сервис для раздачи статических файлов, который балансирует запросы между серверами.
 
-```bash
-docker ps  :: отобразить запущенные контейнеры
-docker ps -a  :: посмотреть и остановленные процессы
-docker logs <id / name>  :: посмотреть логи приложения
-docker start <id>  :: запустить остановленный контейнер
-docker restart <id>  :: перезапустить контейнер
-docker stop <id>  :: остановить контейнер
-docker rm <id>  :: удалить контейнер
-docker rm -f <id>  :: даже работающий контейнер
-docker system prune  :: удалить всё
+ в этот момент:
+1. инициализируется файловая система
+2. выдается IP-адрес внутри сети docker
+3. запускается команда `CMD` из Dockerfile и ей выдается PID 1
+
+```sh
+docker container ls  # посмотреть запущенные контейнеры
+docker ps  # посмотреть запущенные контейнеры (устаревающая команда)
+docker ps -a  # посмотреть и остановленные контейнеры
+
+docker logs <container>  # посмотреть логи приложения
+docker start <container>  # запустить остановленный контейнер
+docker restart <container>  # перезапустить контейнер
+docker pause <container>  # приостанавливает контейнер (с сохранением в памяти данных)
+docker stop <container>  # остановить контейнер
+
+docker rm <container>  # удалить контейнер
+docker rm -f <container>  # удалить даже работающий контейнер
+docker system prune  # удалить все остановленные контейнеры
 ```
+
+```sh
+docker exec <container> ls  # выпонить команду внутри контейнера
+docker exec -it <container> /bin/bash  # в интерактивном режиме запустить консоль внутри контейнера
+
+# внутри контейнера
+apt update && apt install procps
+ps aux  # посмотреть запущенные процессы (ps elf)
+top  # тоже самое, но интерактивная
+kill <PID>  # остановить процесс (1-ый останавливает контейнер)
+exit  # выйти
+```
+
 
 ## Сеть
 
-**bridge** - сетевой мост (docker0) для доступа в Интернет. Для каждого контейнера создается свой виртуальный сетевой интерфейс.\
-**host** - подключение происходит к сети через сетевое пространство машины.\
-**none** - нет сети.
+**bridge** – виртуальная сеть внутри docker для обьщения между контейнерами.\
+**host** – делить сетевое пространство с машиной.\
+**none** – без сети.
 
 Создание сети:
-```bash
-docker network ls  :: посмотреть созданные сети
-docker network inspect <сеть>  :: детальная информация
-docker network create <сеть>  :: создать
+```sh
+docker network ls  # посмотреть созданные сети
+docker network create <net>  # создать сеть
+docker network inspect <net>  # детальная информация
 
-docker run --network=<сеть> <img>
+docker run --network=<net> <img>  # подключить контейнер к сети.
 ```
 
-## Файловая система
-
-Образ состоит из слоев. **Слой** - добавление файлов поверх предыдущего слоя. Первый слой - базовый scratch.
-
-```Docker
-# ./docker
-FROM python:3.10-slim
-
-WORKDIR /code
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY app.py .
-COPY migrations migrations
-COPY docker_config.py default_config.py
-
-CMD flask run -h 0.0.0.0 -p 80
+```Dockerfile
+# ./Dockerfile
+FROM ubuntu:20.04
+RUN apt update && apt install -y nginx
+CMD nginx -g "deamon off"
 ```
 
-### Запуск [PosgreSQL](https://www.postgresql.org/download/)
+```sh
+docker build -t <img> .
+docker run -p 80:80 -d <img>
+docker kill <container>  # останавливает контейнер (принудительное завершение)
 
-```bash
-docker run -p 5432:5432 --name <app_name>_postgres -e POSTGRES_PASSWORD=postgres -d postgres
+curl localhost:80  # http запрос
+curl -I localhost:80  # HEAD
+
+# внутри контейнера
+apt update && apt install net-tools
+ifconfig  # показать текущие IP-адреса
+```
+
+### DNS в docker
+
+```sh
+docker network create <net>
+docker run -p 80:80 -d --network=<net> --network-alias=<domain> <img>
+
+# внутри контейнера
+apt update && apt install dnsutils
+host <domain>  # показать сопоставленный IP-адрес
+```
+
+
+## Запуск [PosgreSQL](https://www.postgresql.org/download/)
+
+```sh
+docker run -d
+	--network <net>
+	--network-alias <domain>
+	-p 5432:5432
+	-e POSTGRES_USER=<user>  # по умолчанию postgres
+	-e POSTGRES_PASSWORD=<password>  # прокинуть переменные окружения
+	-e POSTGRES_DB=<dbname>  # по умолчанию postgres
+	--name <container>_pg
+	postgres
 ```
 
 ```python
-# ./docker_config.py
-SQLALCHEMY_DATABASE_URL = 'postgresql://flask_app:password@pg/flask_app'
+SQLALCHEMY_DATABASE_URL = 'postgresql://<user>:<password>@<domain>/<dbname>'
 ```
 
-Запуск двух контейнеров в одной сети:
-```bash
-docker run --name <app_name>_postgres  :: название контейнера
-	-e POSTGRES_USER=<app_name>  # поумолчанию postgres
-	-e POSTGRES_PASSWORD=password  # прокинуть переменные окружения внутрь
-	-e POSTGRES_DB=<app_name>  # поумолчанию postgres
-	--network=<app_name>
-	--network-alias pg
-	-v $(pwd)/pg_data:/var/lib/postgresql/data  :: volume
-	-d postgres <key>  :: запустить в фоновом режиме
+### Файловая система
 
-docker run --network flask_app -p 8000:80 --name flask-app -d flask-app
+Образ состоит из слоев. **Слой** – добавление файлов поверх предыдущего слоя, каждый слой имеет свой хэш. Первый слой - базовый, "scratch".
+
+```Dockerfile
+# ./Dockerfile
+FROM python:3.10-slim
+
+ENV HOME /code
+WORKDIR HOME 
+COPY requirements.txt .
+RUN python -m pip install -r requirements.txt  # что редко изменяется, спрятано глубже
+COPY app.py .
+COPY migrations migrations
+COPY docker_config.py default_config.py  # потом это делается через CI/CD 
+ 
+CMD flask run -h 0.0.0.0 -p 80
 ```
 
-```bash
-docker exec flask-app ls  :: посмотреть файлы в контейнере
-docker exec -it flask-app /bin/bash  :: подключиться внутрь к контейнеру
+Запуск двух контейнеров в одной сети (с postgres):
+```sh
+docker run --network <net> -p 80:80 --name <container> -d <img>
+--platform=linux/amd64  # (у apple M1 arm)
+
+# внутри контейнера
+flask db upgrade  # применение миграций
+```
+
+```sh
+docker exec flask-app ls  # посмотреть файлы в контейнере
+docker exec -it flask-app /bin/bash  # подключиться внутрь к контейнеру
 root $ > apt upgrate
 root $ > apt install procps
 root $ > ps aux
@@ -171,84 +230,26 @@ root $ > kill <PID>
 root $ > flask db upgrade  :: применение миграций
 ```
 
-## Команды
-
-```bash
-curl -I localhost:80  :: показадь headers
-```
-
-```bash
-ps aux  :: показать запущенные процессы
-top  :: интерактивная консоль всех текущих процессов в системе
-htop  :: запущенные в системе процессы
-
-dig sky.pro  :: узнать IP-адрес sky.pro
-dig MX sky.pro  :: узнать почтовые адреса sky.pro
-netstat -tulpn. :: активные порты
-aptitude search packet-name  :: поиск пакета packet-name
-
-add-apt-repository ppa:deadsnakes/ppa  :: установить python в ubuntu
-apt install python-pip  :: to install pip
-
-apt install net-tools
-ifconfig  :: посмотреть IP адреса кофига
-
-apt install dnsutils
-host <alias_name>  :: показать IP по доменному имени
-
-journalctl -u app_name  :: показать системные log для app_name
-journalctl -u app_name -f  -n 1000  :: последние
-
-sudo lsof -i :5000
-kill 7426
-
-#копирование файлов
-scp -r dir stasy23@51.250.27.163:python_3/
-
-#старт приложения
-systemctl start unit_name
-systemctl stop unit_name
-systemctl daemon-reload
-
-systemctl enable unit_name  :: на следующей перезагрузке
-systemctl disable unit_name
-
-etc/ssh/sshd_config  :: системные настройки
-sudo service ssh start  :: обновить системы настройки
-
-python3.10 -m venv env
-virtualenv env
-. env/bin/activate
-
-rm -r dir  :: удалить непустой каталог
-
-usermod -aG sudo username  :: дать права администратора пользователю
-```
 
 ***
 
 ## Docker volumes
 
-\- инструмент для хранения файлов в директории `var/lib/docker/volumes`, такой слой, который выделяется контейнеру, и не удаляется после удаления контейнера.
+При создании контейнера выделяется специальный слой, в котором хранятся все изменения файловой системы. Все слои хранятся в `/var/lib/overlay{2}/<id>`.
 
-**Монтирование директории с хоста - пробросить внутрь папку на компьютере
-
-Stateless файлы хранятся в  `var/lib/docker/overlay/<id слоя>`, и удаляются при завершении контейнера (эфимерность).
-
-```bash
-docker run -it --rm busybox  :: войти внутрь контейнера и удать при завершении
-docker exec -it pg /bin/bash  :: отдельно войти
-docker rm -f pg  :: отдельно удалить даже работающее
+Посмотреть ID слоя:
+```sh
+docker {conteiner} inspect <conteiner> # посмотреть слои контейнера и др. метаданные
 ```
 
-```bash
-docker inspect <id or name container>  :: узнать id слоя
-```
+Stateless файлы хранятся в  `/var/lib/docker/overlay{2}/<id>`, и удаляются при завершении контейнера (эфимерность).
+
+**Volume** – инструмент для хранения файлов в директории `/var/lib/docker/volumes` или в пробросанной папке с хоста, т. е. такой слой, который выделяется контейнеру, и не удаляется после его удаления.
 
 Для поиска этой дирректории в Mac OS или Windows:
-```bash
-docker run -it --privileged --pid=host justincormack/nsenter1  :: с помощью привилегированного контейнера
-ls /var/lib/docker/overlay/
+```sh
+docker run -it --privileged --pid=host justincormack/nsenter1  # создание привилегированного контейнера
+ls /var/lib/docker/overlay/  # внутри контейнера
 ```
 
 В Volume можно хранить:
@@ -258,38 +259,37 @@ ls /var/lib/docker/overlay/
 * при разработке пробрасывать код внутрь контейнера
 
 Основные команды:
-```bash
-docker volume ls  :: посмотреть созданные volume
-docker volume create  :: создать volume
-docker volume inspect <name volume>   :: детальная инфо
-docker volume rm <name volume>  :: удалить
-docker volume prune  :: удалить все неиспользуемые в данный момент volume
+```sh
+docker volume ls  # посмотреть созданные volumes
+docker volume create <volume>  # создать volume
+docker volume inspect <volume>   # детальная информация
+docker volume rm <volume>  # удалить
+docker volume prune  # удалить все неиспользуемые в данный момент volumes
 
-# Проброс volume в контейнер
-docker volume create test
-docker run -v test:/dir_in_container <образ>
+docker run -v <volume> :/dir_in_container <img>  # проброс volume в контейнер
+docker run -v /dir_in_host:/dir_in_container <img>  # монтирование директории с хоста в контейнер
 
-# Проброс директории с хоста в контейнер
-docker run -v /host_dir:/dir_in_container -d nginx
+# пример для postgers
+docker run ... -v $(pwd)/pg_data:/var/lib/postgresql/data postgres
 ```
 
 
 ## Docker Compose
 
- \- инструмент для одновременного управления несколькими контейнерами, которые входят в состав одного приложения.
+ – инструмент для одновременного управления несколькими контейнерами, которые входят в состав одного приложения.
  
- В одной файле описывается весь состав приложения:
+ В одном файле описывается весь состав приложения:
  * контейнеры
  * сети
- * volumes - тома
+ * volumes-тома
  * порядок запуска контейнеров
  
-```
+```yaml
 # .\docker-compose.yaml
 version: "3.9"
 services:  # описание контейнеров
   api:  # название контейнера
-    build:
+    build:  # собрать образ перед запуском
       context: .
     ports:
     - 8000:80
@@ -297,18 +297,19 @@ services:  # описание контейнеров
     image: postgres:latest  # готовый образ
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: myapp
 ```
  
- Основные команды:
-```
+Основные команды:
+```sh
 docker-compose up -d # запустить всё приложение в режиме демона
-docker-compose stop
+docker-compose up --build  # запустить всё с пересборкой из Dockerfile
 docker-compose start # запустить контейнеры
+docker-compose stop  # остановить контейнер
 docker-compose down  # остановить контейнеры и удалить все компоненты
-docker-compose build  # cобрать образы
+docker-compose build  # cобрать образы  
 docker-compose pull  # скачать необходимые образы
-docker-compose logs  # посмотреть логи сервисов
+docker-compose logs  -f # посмотреть логи сервисов в режиме реального времени
+docker-compose exec -it <service> /bin/bash  # войти внутрь контейнера
 ```
 
 ### порядок запуска Docker Compose
@@ -318,22 +319,23 @@ docker-compose logs  # посмотреть логи сервисов
 3) запустить приложение
 
 `depends_on` секция позволяет указать порядок запуска сервисов по условию:
-- **service_started** — просто порядок запуска;
-- **service_healthy** — запустить только после того, как контейнер будет работать (пройдет healthcheck);
-- **service_completed_successfully** — запустить только после того, как успешно завершится другой контейнер.
+- **service_started** – просто порядок запуска;
+- **service_healthy** – запустить только после того, как контейнер будет работать (пройдет healthcheck);
+- **service_completed_successfully** – запустить только после того, как успешно завершится другой контейнер.
 
-```
+```yaml
 # .\docker-compose.yaml
 version: "3.9"
 services:
   api:
     build:
       context: .
+    image: <login>/<repo>  # для команды pull
     ports:
-    - 8000:80
+      - 8000:80
     volumes:
       - ./docker_config.py:/code/default_config.py
-    depends_on:
+    depends_on:  # порядок запуска
       postgres:
         condition: service_healthy
       migrations:
@@ -341,12 +343,13 @@ services:
   migrations:
     build:
       context: .
+    image: <login>/<repo>
     volumes:
       - ./docker_config.py:/code/default_config.py
     depends_on:
       postgres:
         condition: service_healthy
-    command: flask db upgrade
+    command: flask db upgrade  # переобределение CMD из Dockerfile
   postgres:
     image: postgres:latest
     environment:
@@ -355,65 +358,53 @@ services:
       POSTGRES_DB: flask_app
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-    healthcheck:
+    healthcheck:  # секция, которая определяет когда контейнер корректно запущен и готов к работе
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 5  # количество провальных попыток 
 ```
-
-**healthcheck** - секция, которая определяет когда контейнер корректно запущен и готов к работе.
  
  
  ## Деплой через Docker Compose на сервер
  
- 1) собрать образы
-```bash
- docker build -t sermalenk/flask-app:version-1 . 
-```
- 2) отапрвит в Docker Hub - бесплатный registry
-```bash
-docker build -t sermalenk/flask-app:version-1 .
-docker push sermalenk/flask-app:version-1
-```
- 
-```
-# .\docker-compose.yaml
-  api:
-    image: sermalenk/flask-app:version-1
-  migrations:
-    image: sermalenk/flask-app:version-1
-  postgres:
-    image: postgres:latest
-```
- 
- 3) устанавливаем Docker на сервере
- Подключаемся через SSH к серверу. И [по иснструкции](https://docs.docker.com/engine/install/ubuntu/)
- 
-```bash
- sudo su
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-apt-get update
-apt-get install docker-ce docker-ce-cli containerd.io
-
-# устанавливаем docker-compose
-curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+1) собрать образы и отправить в registry:
+```sh
+docker login
+docker-compose build
+docker-comose push
+# или, если нет секции image:
+docker build -t <login>/<repo>:<tag> .
+docker push <login>/<repo>:<tag>
 ```
 
-4) копируем docker-compose-server.yaml на сервер
-```bash
-scp <путь до проекта>/docker_config.py <имя>@<адрес>:.
-scp <путь до проекта>/docker-compose-server.yaml <имя>@<адрес>:docker-compose.yaml
-```
-
-5) запускаем
-```bash
+2) установить [docker на VM](https://docs.docker.com/engine/install/ubuntu/):
+```sh
+# sudo apt -y install curl
 sudo su
+curl ...
+echo ...
+apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+3) установить [docker-compose на VM](https://losst.pro/ustanovka-docker-compose-v-ubuntu-20-04):
+```sh
+curl ...
+chmod ...
+ls -s /usr/local/bin/docker-compose /usr/ bin/docker-compose
+```
+
+4) копируем yaml на сервер и запускаем:
+```sh
+scp docker_config.py <login>@<domain>:<project_name>/default_config.py
+scp docker-compose.yaml <login>@<domain>:<project_name>
 docker-compose up -d
 ```
 
+
+### Docker Swarm
+
+– позволяет обеспечивать взаимодействие между контейнерами в том случае, если контейнеры находятся на разных физических docker хостах.
+
+Kubernetes и Swarm – это оркестраторы контейнеров, которые позволяют управлять большими кластерами Docker-хостов и координировать запуск и остановку контейнеров на них.

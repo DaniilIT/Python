@@ -4,87 +4,85 @@
 	У всех проектов общие ресурсы: процессор и оперативная память.\
 	Нет возможности настраивать операционную систему под себя. 
 
-* **Выделенный сервер**
-	Администраторский доступ ко всему железу.
+* **Выделенный сервер (VDS)**
+	Virtual Dedicated Server. Администраторский доступ ко всему железу.
 
 * **Виртуальная машина (VPS)**
-	На одном «железе» размещается сразу несколько виртуальных «компьютеров».
+	Virtual Private Server. На одном «железе» размещается сразу несколько виртуальных «компьютеров».
 	Есть возможности настраивать операционную систему под себя. 
 
 
 # VPS
 
-**Гипервизор** - специальное ПО, который позволяет запускать изолированные виртуальные машины,\
+**Гипервизор** – специальное ПО, который создает и запускает изолированные виртуальные машины,\
 то есть распределяет ресурсы между несколькими ОС.
 
-* программная - VirtualBox, Parallels
-* аппаратная - KVM, VMware, vSphere, Hyper-V
+* программная – VirtualBox, Parallels
+* аппаратная – KVM, VMware, vSphere, Hyper-V
 
-Подключение к виртуальной машине (серверу) и управление происходит с помощью сетегого протокола прикладного уровня SSH (Secure Shell) и программы  **OpenSSH Daemon (sshd)** - демон (работает в фоновом режиме).
+**Виртуальная машина** – среда, которая эмулирует ПО, используя ресурсы физического хоста.
 
-Все данные, которые проходят по SSH-протоколу, шифруются  с помощью публичного и приватного (для расшифоровки) ключа.
+Подключение к виртуальной машине (удаленному серверу) и управление происходит с помощью сетегого протокола прикладного уровня **SSH (Secure Shell)** и программы  **OpenSSH Daemon (sshd)** – демон (работает в фоновом режиме).
+
+Все данные, которые проходят по SSH-протоколу, шифруются  с помощью публичного (для шифрования) и приватного (для расшифоровки) ключей.
 
 создать SHH ключи:
-```shell
-ssh-keygen -t rsa
-
-cat ~/.ssh/id_rsa.pub
+```sh
+ssh-keygen -t rsa  # стандартный алгоритм
+cat .ssh/id_rsa.pub
+# на сервере хранится в /home/<login>/.ssh/authorized_keys
 ```
 
-Публичный ключ надо положить на сервер в #.ssh/id_rsa.pub
-
-[урок](https://skyengpublic.notion.site/25-1-8f89fad8c11e47db8e028c470ef90816)
-[Yandex Cloud](https://cloud.yandex.ru/docs/managed-kubernetes/operations/node-connect-ssh)
-[Благодаря DNS мы можем дать нашей виртуальной машине человекопонятный адрес.](https://www.freenom.com/ru/index.html?lang=ru)
-
-Создание VM
-1) https://cloud.yandex.ru/
-2) подключиться
-3) Computer Cloud
-4) Создать BM
-5) Платформа "Intel Cascade Lake" 
-6) ...
-7) Cloud DNS - привязать доменное имя (зона: `***.ga.`).
+Благодаря DNS (Domain Name System) мы можем дать виртуальной машине человекопонятный адрес.
 
 
 ## подключение:
 
-```shell
-ssh login@xxx.xxx.xxx.xxx
+```sh
+ssh <login>@IP4
+ssh <login>@<домен>  # ssh dmanulov@daniilit.online
+# войдет как <login>@<name>
+sudo su  # root@<name> # режим администратора
 
-ssh login@***.ga
-
-exit  :: выйти из VM
+logout  # exit  # выйти из VM
 ```
 
+
 посмотреть запущенные процессы:
-```shell
+```sh
 ps aux
 ```
 
 попсмотреть кто обслуживает доменное имя:
-```shell
-dig +trace ***.ga  :: например ns1.yandexcloud.net
+```sh
+dig +trace <домен>  # например ns1.yandexcloud.net
+dig <домен> any  # посмотреть записи
 ```
 
-DNS используется не только для получения адреса по доменному имени. типы DNS-записей:
-* **А** - адрес веб-ресурса (IPv4-адрес), который соответствует введенному имени домена.
-* **NS** - адрес DNS-сервера, отвечающего за содержание прочих ресурсных записей (делегирование).
-* **MX** - адрес почтового сервера.
-* **CNAME** - переадресация на другой домен.
-* **TXT** - любая текстовая информация о домене.
-* **SPF** - данные с указанием списка серверов, которым позволено отправлять письма от имени указанного домена.
-* **SOA** - исходная запись зоны, в которой указаны сведения о сервере, содержащем образцовую информацию о доменном имени.
+DNS используется не только для получения IP адреса по доменному имени. типы DNS-записей:
+* **А** – адрес веб-ресурса (IPv4-адрес), который соответствует введенному имени домена.
+* **AAAA** - для IPv6.
+* **NS** – адрес DNS-сервера, отвечающего за содержание прочих ресурсных записей (кому делегирован).
+* **MX** – адрес почтового сервера.
+* **CNAME** – переадресация на другой домен, например прикрепление поддомена (www.site.ru -> site.ru).
+* **TXT** – любая текстовая информация о домене.
+* **SPF** – данные с указанием списка серверов, которым позволено отправлять письма от имени указанного домена.
+* **SOA** – исходная запись настройки зоны, в которой указаны сведения о сервере, содержащем образцовую информацию о доменном имени.
 
-Посмотреть DNS-записи:
-```shell
-dig sky.pro any
+создать нового пользователя:
+```sh
+sudo su
+adduser <user>  # задать пароль
+usermod -aG sudo <user>  # дать права администратора
+# vim /etc/ssh/sshd_config
+# PasswordAuthentication no -> PasswordAuthentication yes
+service ssh restart
 ```
 
 
 ## APT
 
-Пакетный менеджер:
+– (Advanced Packaging Tool) пакетный менеджер:
 * устанавливает/обновляет/удаляет библиотеки и компоненты систем;
 * устанавливает зависимости этих компонентов;
 * следит за совместимостью пакетов друг с другом.
@@ -93,51 +91,52 @@ dig sky.pro any
 
 Ubuntu/debian: **apt**, MacOS: **brew**.
 
-```shell
-apt update  :: обновить БД пакетов
-apt install python  :: установить пакет Python
-apt remove python
-apt install --reinstall python
-```
-
-Установка Python 3.10:
-```shell
+Установка python:
+```sh
 sudo su
-add-apt-repository ppa:deadsnakes/ppa  :: обновление базы apt
-apt install python3.10
+apt update  # обновить БД пакетов
+add-apt-repository ppa:deadsnakes/ppa  # установит репозиторий, чтобы можно было установить актуальный python
+apt install python3.11  # установить python
+apt-get install python-is-python3
+
+apt install --reinstall python  # обновить
+apt remove python  # purge - полностью удалить
 ```
 
-Установка БД PostgreSQL:
-```shell
+
+```sh
+apt install git
+apt install python3-pip
+apt install python3-venv
+
+python3 -m venv venv
+. venv/bin/activate  # source venv/bin/activate
+```
+
+
+Установка PostgreSQL:
+```sh
 apt install postgresql
 
 sudo su postgres
-createuser --interactive -P  :: flask_app_user, password, n, n, n
-createdb flask_app --owner flask_app_user 
-psql -U flask_app_user -h 127.0.0.1 flask_app
-\l  :: посмотреть доступные DB
-```
-
-Установка venv:
-```shell
-apt install python3.10-venv
-
-python3.10 -m venv env
-. env/bin/activate  :: source env/bin/activate
+createuser --interactive -P  # username, password, n, n, n  # права
+createdb username --owner db_name 
+psql -U username -h 127.0.0.1 db_name
+\l  # посмотреть доступные DB
 ```
 
 
-## Загрузка кода приложения на сервер
+## Перемещение файлов на сервер
 
 * копирование файлов через FTP
 * копирование файлов через Git
 * копирование файлов через SSH
 
-**SCP** - утилита для копированя файлов поверх SSH.
+**SCP** – утилита для копированя файлов поверх SSH.
 
-```shell
-scp test.txt malenko@51.250.22.196:test.txt  :: копирование одного файла
-scp -r dir/ malenko@51.250.22.196:.  :: копирование директории
+```sh
+scp test.txt <login>@<name>:test.txt  # копирование файла
+scp -r dir/ <login>@<name>:.  # копирование директории
  
 scp -r dir_name malenko@***.ga:flask_app    :: копирование директории
 ```
@@ -145,43 +144,50 @@ scp -r dir_name malenko@***.ga:flask_app    :: копирование дирек
 
 ## systemd
 
-\- система инициализации ОС (запускает процессы при старте системы)
+– система инициализации ОС (запускает процессы при старте системы)
 
 юнит-файл:
 ```
-# vim /etc/systemd/system/flask-api.service  # esc + :wq
+# vim /etc/systemd/system/flask-api.service
 
 [Unit]
 Description=Flask-app
-After=network.target
+After=network.target  # запуск после инициализации сети
 
 [Service]
-WorkingDirectory=/opt/app/flask-app/  # /home/...
-ExecStart=/opt/app/env/bin/python -m flask run -h 0.0.0.0 -p 80
-Environment="APP_SETTINGS=/etc/flask-app/config.py"
-Restart=always
+WorkingDirectory= /home/<login>/flask-app/  # /opt/app/flask-app/
+ExecStart=/home/<login>/flask-app/venv/bin/python -m flask run -h 0.0.0.0 -p 80
+# ExecStart=/home/dmanuilov/sky_flask/venv/bin/gunicorn app:app -b 0.0.0.0:80 -w 4
+Environment="APP_SETTINGS=/home/<login>/config.py"
 Envirenment="FLASK_APP=main.py"
+Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target  # уровень запуска сервиса
 ```
 
-чтобы systemd подтянул новую конфигурацию:
-```shell
+подтянуть новую конфигурацию:
+```sh
 systemctl daemon-reload
 ```
 
-«включаем» сервис:
-```shell
-systemctl start flask-api  :: название берется из названия unit-файла
+включить сервис:
+```sh
+systemctl start flask-api  # название unit-файла
+systemctl stop flask-api
+systemctl enable flask-api  # включить восле перезагрузки
+systemctl disable flask-api
 ```
-
+ 
 посмотреть работу приложения:
-```shell
-systemctl status flask_app
+```sh
+systemctl status flask-api
 ```
 
 посмотреть журнал вызовов:
-```shell
-journalctl -u flask-app -f -n 1000
+```sh
+journalctl -u flask-api -f -n 1000
+
+# освободить порт
+kill -9 $(lsof -t -i:80)
 ```
