@@ -9,9 +9,9 @@ Continuous Integration / Delivery (непрерывная интеграция �
 4) Test – тестирование (pytest)
 
 **CD**
-5) Release – присвоение рабочей версии продукта и подготовка к развертыванию на серверах (push в registry DockerHub, Artefactory, Nexus)
-6) Deploy – развертывание (pull + up) на production-серверах
-7) Operate – поддержка и мониторинг, анализ пользовательского опыта
+1) Release – присвоение рабочей версии продукта и подготовка к развертыванию на серверах (push в registry DockerHub, Artefactory, Nexus)
+2) Deploy – развертывание (pull + up) на production-серверах
+3) Operate – поддержка и мониторинг, анализ пользовательского опыта
 
 Плюсы:
 * увеличение частоты релизов
@@ -29,7 +29,7 @@ Continuous Integration / Delivery (непрерывная интеграция �
 * **Action** – действия, которые описаны внутри каждого шага, пользовательская библиотека готового скрипта.
 * **Runner** – исполнитель скриптов, сервер.
 
-\# .github/workflows/<action>.yaml
+\# .github/workflows/actions.yaml
 
 ```yaml
 name: Build and deploy action
@@ -86,19 +86,20 @@ name: Build and deploy action
 on: [push]
 jobs:
   build_and_push:
-	...
+    ...
   deploy:
   	runs-on: ubuntu-latest
   	needs: build_and_push  # последовательность исполнения
   	env:  # переменные для замены в файлах
   		DB_USER: <user>
   		DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  		DB_NAME: ${{ secrets.DB_NAME }}
+  		DB_NAME: ${{ vars.DB_NAME }}
   	steps:
       - name: clone code 
         uses: actions/checkout@v2
       - name: render configs
         run: |
+          # export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           mkdir deploy
           cat docker_config_ci.py | envsubst > deploy/docker_config.py
           cat docker-compose_ci.yaml | envsubst > deploy/docker-compose.yaml
@@ -141,18 +142,18 @@ name: Build and deploy action
 on: [push]
 jobs:
   build_and_push:
-	...
+    ...
   deploy:
   	runs-on: ubuntu-latest
   	needs: build_and_push
   	env:
-  		...
+      ...
   	steps:
   	  - name: clone code 
         uses: actions/checkout@v2
       - name: render configs
         ...
-	  - name: clone files to server
+      - name: clone files to server
         uses: appleboy/scp-action@master  # готовый action для загрузки файлов через SCP
         with:
           host: ${{ secrets.HOST }}
@@ -160,7 +161,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           # Указываем, какие файлы копировать
           source: "deploy/docker-compose.yaml,deploy/docker_config.py"
-		  # Место на виртуальной машине, куда скопируются файлы
+          # Место на виртуальной машине, куда скопируются файлы
           target: "flask-app"
           strip_components: 1  # убрать подкатолог "deploy"
       - name: run docker-compose

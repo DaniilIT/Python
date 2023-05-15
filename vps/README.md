@@ -28,7 +28,7 @@
 
 создать SHH ключи:
 ```sh
-ssh-keygen -t rsa  # стандартный алгоритм
+ssh-keygen -t rsa  # -t ed25519  # алгоритм
 cat .ssh/id_rsa.pub
 # на сервере хранится в /home/<login>/.ssh/authorized_keys
 ```
@@ -40,13 +40,24 @@ cat .ssh/id_rsa.pub
 
 ```sh
 ssh <login>@IP4
-ssh <login>@<домен>  # ssh dmanulov@daniilit.online
+ssh <login>@<домен>  # ssh dmanuilov@daniilit.online
 # войдет как <login>@<name>
 sudo su  # root@<name> # режим администратора
 
 logout  # exit  # выйти из VM
 ```
 
+создать нового пользователя:
+```sh
+sudo su
+adduser <user>  # задать пароль
+usermod -aG sudo <user>  # дать права администратора
+# vim /etc/ssh/sshd_config
+# PasswordAuthentication no -> PasswordAuthentication yes
+service ssh restart
+
+sudo su - <user>  # поменять пользователя
+```
 
 посмотреть запущенные процессы:
 ```sh
@@ -69,21 +80,11 @@ DNS используется не только для получения IP ад
 * **SPF** – данные с указанием списка серверов, которым позволено отправлять письма от имени указанного домена.
 * **SOA** – исходная запись настройки зоны, в которой указаны сведения о сервере, содержащем образцовую информацию о доменном имени.
 
-создать нового пользователя:
-```sh
-sudo su
-adduser <user>  # задать пароль
-usermod -aG sudo <user>  # дать права администратора
-# vim /etc/ssh/sshd_config
-# PasswordAuthentication no -> PasswordAuthentication yes
-service ssh restart
-```
-
 
 ## APT
 
 – (Advanced Packaging Tool) пакетный менеджер:
-* устанавливает/обновляет/удаляет библиотеки и компоненты систем;
+* устанавливает/обновляет/удаляет библиотеки и компоненты системы;
 * устанавливает зависимости этих компонентов;
 * следит за совместимостью пакетов друг с другом.
 
@@ -94,25 +95,24 @@ Ubuntu/debian: **apt**, MacOS: **brew**.
 Установка python:
 ```sh
 sudo su
-apt update  # обновить БД пакетов
+apt update && apt upgrade  # обновить БД пакетов
 add-apt-repository ppa:deadsnakes/ppa  # установит репозиторий, чтобы можно было установить актуальный python
 apt install python3.11  # установить python
-apt-get install python-is-python3
+apt-get install python-is-python3  # настроить ссылку
 
 apt install --reinstall python  # обновить
 apt remove python  # purge - полностью удалить
 ```
 
-
 ```sh
 apt install git
 apt install python3-pip
 apt install python3-venv
+apt install python3.11-venv
 
-python3 -m venv venv
+python3.11 -m venv venv
 . venv/bin/activate  # source venv/bin/activate
 ```
-
 
 Установка PostgreSQL:
 ```sh
@@ -137,8 +137,6 @@ psql -U username -h 127.0.0.1 db_name
 ```sh
 scp test.txt <login>@<name>:test.txt  # копирование файла
 scp -r dir/ <login>@<name>:.  # копирование директории
- 
-scp -r dir_name malenko@***.ga:flask_app    :: копирование директории
 ```
 
 
@@ -151,13 +149,13 @@ scp -r dir_name malenko@***.ga:flask_app    :: копирование дирек
 # vim /etc/systemd/system/flask-api.service
 
 [Unit]
-Description=Flask-app
+Description=flask-app
 After=network.target  # запуск после инициализации сети
 
 [Service]
 WorkingDirectory= /home/<login>/flask-app/  # /opt/app/flask-app/
-ExecStart=/home/<login>/flask-app/venv/bin/python -m flask run -h 0.0.0.0 -p 80
-# ExecStart=/home/dmanuilov/sky_flask/venv/bin/gunicorn app:app -b 0.0.0.0:80 -w 4
+ExecStart=/home/<login>/sky_flask/venv/bin/python -m flask run -h 0.0.0.0 -p 80
+# ExecStart=/home/<login>/sky_flask/venv/bin/gunicorn app:app -b 0.0.0.0:80 -w 4
 Environment="APP_SETTINGS=/home/<login>/config.py"
 Envirenment="FLASK_APP=main.py"
 Restart=always
