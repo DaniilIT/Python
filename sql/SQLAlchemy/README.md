@@ -1,6 +1,7 @@
 # ORM
 
-**Object Relational Mapper** – паттерн, для абстрагирования от реализации DBMS (СУБД) автоматизированно переводящий поля DB в поля класса и выполняющий SQL-запросы посредством методов класса.
+**Object Relational Mapper** – объектно реляционное отображение, технология программирования, которая связывает базы даннх с концепциями ООП, что позволяет абстрагироваться от реализации DBMS (СУБД) и автоматизированно отобразить поля DB в поля класса, а SQL-запросы в методы класса.
+
 
 **DB** $\Leftrightarrow$ **СУБД** $\Leftrightarrow$ **SQL-запросы** $\Leftrightarrow$ **ORM** $\Leftrightarrow$ **app**
 
@@ -35,11 +36,13 @@ dialect+driver://username:password@hostname:port/database
 
 sqlite:///dbname.db (sqlite:///:memory:)
 mysql+pymysql://root:***@localhost/dbname
-postgresql+psycorg2://localhost/dbname
+postgresql+psycopg2://root:***@localhost:5432/dbname
 oracle+cx_oraccle://root:***@localhost/dbname
 mysql+mysqlconnector://root:***@localhost/dbname
 mssql+pyodbc://root:***@localhost/dbname  # работает с разными DB
 ```
+
+Для psycopg2 необходимо `brew install postgresql`,  `apt update && apt install libpq-dev` или `poetry add psycopg2-binary`
 
 
 ### [Типы данных](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#mapped-column-derives-the-datatype-and-nullability-from-the-mapped-annotation)
@@ -88,6 +91,28 @@ with app.app_context():
         db.session.add_all([user1, user2])
 ```
 
+чистый sqlalchemy:
+```python
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'user'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(40))
+
+engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost:5432/postgres', echo=True)  # логирование
+Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(engine)  # создание таблиц в случае не соответствия их с моделями
+Session = sessionmaker(engine)
+session = Session()
+session.add(User(id=1, name='username1'))
+session.commit()
+```
+
 
 ### Получение данных
 
@@ -125,13 +150,17 @@ class User(db.Model):
     __tablename__ = 'user'
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False)
+    name = db.Column(db.String(40), nullable=False)  # поумолчанию True (может быть пустым)
     login = db.Column(db.String(40), unique=True)
     age = db.Column(db.Integer, db.CheckConstraint('age >= 18'), default=18)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow)
     
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL')
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='SET NULL'))
     group = db.relationship('Group')
+    
+    # from sqlalchemy.orm import relationship
+    # group_id = Column(Integer, ForeignKey('group.id', ondelete='CASCADE'), nullable=False)
+    # group = relationship('Group', back_populates='users')
     
     def __repl__():
         return f'<User: {self.name}>'
@@ -144,16 +173,28 @@ class Group(db.Model):
     name = db.Column(db.String(40))
     
     users = db.relationship('User')
+    # users = relationship('User', back_populates='group')
+    # users = relationship('User', backref='group', lazy=True)  # тогда только здесь указывается
+    # lazy=True - загрузка данных за один раз с помощью оператора select
+    # lazy=False - загрузка данных в том же запросе с помощью оператора join
+    # lazy='dynamic' - возвращает query для дальнейшей обработки
 ```
 
 
 ### ManyToMany
 
 ```python
-post_tags = db.Table('post_tags',
-					 db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE')),
-					 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id', ondelete='CASCADE'))
-					)
+post_tags = db.Table(
+    'post_tags',
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id', ondelete='CASCADE'), nullable=False)
+)
+# post_tags = Table(
+#     'post_tags', Base.metadata,
+#     Column('post_id', Integer, ForeignKey('post.id', ondelete='CASCADE'), nullable=False),
+#     Column('tag_id', Integer, ForeignKey('tag.id', ondelete='CASCADE'), nullable=False)
+# )
+
 					
 # >>> with app.app_context():
 # ...     tag1 = Tag.query.first()
@@ -169,11 +210,12 @@ post_tags = db.Table('post_tags',
 
 class Post(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	tags = db.relationship('Tag', secondary=post_tags,
-		                   backref=db.backref('posts', lazy='dynamic'))  # lazy - возвразает query для дальнейшей обработки
+	tags = db.relationship('Tag', secondary=post_tags, backref=db.backref('posts', lazy='dynamic'))  # Возможно ошибка в скобках
+    # tags = relationship('Tag', secondary=post_tags, back_populates='posts', lazy=True)
 
 class Tag(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
+	# posts = relationship('Post', secondary=post_tags, back_populates='tags', lazy=True)
 ```
 
 
@@ -210,10 +252,17 @@ SELECT * FROM user WHERE age < 30
 
 ```python
 # query = db.session.query(User).filter(User.age == 18)
+# query = db.session.query(User).filter_by(User.age=18)
 query = User.query.filter(User.age < 30)
 # print(query)  # получить сырой текст запроса
 users = query.all()
 user1_name = query.first().name
+```
+
+```python
+stmt = select(Book).where(Book.title == 'Робинзон Крузо')
+for book in session.scalars(stmt):
+    print(book)
 ```
 
 ---

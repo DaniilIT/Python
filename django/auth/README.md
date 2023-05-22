@@ -17,7 +17,7 @@
 # authentication/models.py
 from django.contrib.auth.models import User, AbstractUser
 
-# Profile(models.Model) - новая таблица c ForeignKey
+# Profile(models.Model) - новая таблица c OneToOneField(User)
 # Profile(User) - новая таблица с id на User
 class User(AbstractUser):  # swappable = "AUTH_USER_MODEL"
     MALE = 'm'
@@ -26,13 +26,6 @@ class User(AbstractUser):  # swappable = "AUTH_USER_MODEL"
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     sex = models.CharField(max_length=1, choices=SEX, default=MALE)
-```
-
-Откатить миграции для встроенного auth, и накатить свежие:
-```sh
-./manage.py migrate auth zero
-./manage.py makemigrations
-./manage.py migrate
 ```
 
 Переопределяем модель User для всего приложения
@@ -236,6 +229,19 @@ class VacancyCreatePermissions(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
         return request.user.role == User.HR
+```
+
+---
+
+```python
+class MPagination(pagination.PageNumberPagination):
+    page_size = 4
+
+class MViewSet(viewsets.ModelViewSet):
+    queryset = M.objects.all()
+    serializer_class = MSerializer
+    pagination_class = MPagination
+    permission_classes = (AllowAny,)
 ```
 
 ### содздать суперпользователя

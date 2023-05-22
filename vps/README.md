@@ -56,6 +56,7 @@ usermod -aG sudo <user>  # дать права администратора
 # PasswordAuthentication no -> PasswordAuthentication yes
 service ssh restart
 
+ssh -i ~/.ssh/<ssh> <login>@IP4  # войти с указанием ключа
 sudo su - <user>  # поменять пользователя
 ```
 

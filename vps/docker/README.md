@@ -178,7 +178,13 @@ docker run -d
 	-e POSTGRES_PASSWORD=<password>  # прокинуть переменные окружения
 	-e POSTGRES_DB=<dbname>  # по умолчанию postgres
 	--name <container>_pg
-	postgres
+	postgres:alpine
+```
+
+```sh
+psql -U user_name -d db_name -h 127.0.0.1
+\q  # выйти
+\dt  # отобразить таблицы
 ```
 
 ```python

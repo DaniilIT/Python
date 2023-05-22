@@ -117,6 +117,9 @@ base = path.name  # pic.png
 dst = path.parent  # data/imgs
 dst.joinpath(base)  # data/imgs/pic.png
 print(path.suffix)  # .png
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR / 'dir'  # os.path.join(BASE_DIR, 'dir')
 ```
 
 

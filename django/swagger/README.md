@@ -103,6 +103,7 @@ class ItenListView(ListAPIView):
         description='Retrieve item list',  # 'Returns a single item'
         summary="Item list",  # 'Find item by ID'  # короткое описание
         deprecated=True  # устаревший метод (будет зачеркнутым)
+        http_method_names = ['put']  # поддерживаемые методы
     )
     def get(self, request, *args, **kwargs):
         pass
@@ -110,13 +111,12 @@ class ItenListView(ListAPIView):
 class ItemUpdateView(UpdateAPIView):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
-    http_method_names = ['put']  # убрать patch из документации
 ```
 
 ```python
 @extend_schema_view(
     list=extend_schema(description="Retrieve skills", summary="Skills list"),
-    creatr=extend_schema(description="Create new skill object", summary="Create skill")
+    create=extend_schema(description="Create new skill object", summary="Create skill")
 )
 class SkillViewSet(ModelViewSet):
     queryset = Skill.objects.all()

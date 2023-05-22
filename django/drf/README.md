@@ -1,24 +1,24 @@
 # [DRF](https://www.django-rest-framework.org/)
 
-**Django REST Framework** - фреймворк поверх Django, с помощью которого можно очень удобно писать REST API.\
+**Django REST Framework** – фреймворк поверх Django, с помощью которого можно очень удобно писать REST API.\
 (Django задуман как монолитное приложение).
 
 <img src="images/drf.png" alt="logo drf" title="Logo DRF" style="height: 240px;" />
 
-**GenericView** - класс, который используется для написания view какого-то конкретного URL.\
-**Mixin** - класс-примесь, который используется для конкретной функциональности.\
-**Serializer** - класс, который переводит python-объект в json-формат и наоборот.
+**GenericView** – класс, который используется для написания view какого-то конкретного URL, включая в себя шаюлоны для общих случаев использования.\
+**Mixin** – класс-примесь, который реализует конкретную функциональность.\
+**Serializer** – класс, который переводит python-объект в json-формат и наоборот.
 
 
 ## Установка DRF
 
-```bash
+```sh
 poetry add djangorestframework
 ```
 
 подключение в качестве модуля:
 ```python
-# project_name/settings.py
+# <project>/settings.py
 
 INSTALLED_APPS = [
     ...
@@ -115,6 +115,7 @@ class MCreateView(CreateAPIView):
 class MUpdateView(UpdateAPIView):
     queryset = M.objects.all()
     serializer_class = MUpdateSerializer
+    http_method_names = ['put']  # убрать patch
 
 
 class MDeleteView(DestroyAPIView):
@@ -206,7 +207,7 @@ class MCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def is_valid(self, *, raise_exception=False):
-        self._skills = self.initial_data.pop('skills')
+        self._skills = self.initial_data.pop('skills', [])
         return super().is_valid(raise_exception=raise_exception)
 
     def create(self, validated_data):
@@ -236,7 +237,7 @@ class MUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def is_valid(self, *, raise_exception=False):
-        self._skills = self.initial_data.pop('skills')
+        self._skills = self.initial_data.pop('skills', [])
         return super().is_valid(raise_exception=raise_exception)
 
     def save(self, **kwargs):
@@ -261,24 +262,24 @@ class MDestroySerializer(serializers.ModelSerializer):
 
 ## ViewSet
 
-\- (ручки) базовыкласс, который содержит в себе все API-методы для одной модели. (от него наследуется APIView)
+– (ручки) базовыкласс, который содержит в себе все API-методы для одной модели. (от него наследуется APIView)
 
-- ViewSet - базовый, без готовых action-методов
-- GenericViewSet - есть некоторые готовые методы, но нет action
-- ModelsViewSet - есть все базовые методы для работы с моделями
-- ReadOnlyViewSet - только для чтения
+- ViewSet – базовый, без готовых action-методов
+- GenericViewSet – есть некоторые готовые методы, но нет action
+- ModelViewSet – есть все базовые методы для работы с моделями
+- ReadOnlyViewSet – только для чтения
 
 ```python
 from rest_framework import viewsets
 
 class UserViewSet(viewsets.ViewSet):
     def list(self, request):
-		queryset = User.objects.all()
+	    queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
     
     def retrieve(self, request, pk=None):
-		queryset = User.objects.all()
+	    queryset = User.objects.all()
         user = get_object_or_404(queryset, pk=pk)
         serializer = UserSerializer(user)
         return Response(serializer.data)
@@ -290,7 +291,7 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def update(self, request, pk=None):
-		queryset = User.objects.all()
+	    queryset = User.objects.all()
         user = get_object_or_404(queryset, pk=pk)
         
         serializer = UserSerializer(user, data=request.data, partial=partial)
@@ -351,7 +352,7 @@ class SkillSerializer(serializers.ModelSerializer):
 
 ### Router
 
-\- класс, который распаковывает ViewSet в набор URL-машрутов.
+– класс, который распаковывает ViewSet в набор URL-машрутов.
 
 ```python
 # project_name/urls.py
@@ -368,7 +369,7 @@ urlpatterns += router.urls
 
 ### Lookup field
 
-\- ключевые слова в Django ORM для формирования WHERE-блока SQL-запроса
+– ключевые слова в Django ORM для формирования WHERE-блока SQL-запроса
 
 <img src="images/lookups.png" alt="lookups" title="Lookups" style="height: 570px;" />
 
@@ -384,7 +385,7 @@ urlpatterns += router.urls
 
 ### Q-запросы
 
-\- обертки для условий фильтрации, которые можно соеденить между собой с помощью логических операторов в WHERE-блоке SQL-запроса.
+– обертки для условий фильтрации, которые можно соеденить между собой с помощью логических операторов в WHERE-блоке SQL-запроса.
 
 Lookup для связей:
 ```python
@@ -408,7 +409,7 @@ from django.db.models import Q
 
 ### F-запросы
 
-\- запросы с использованием класса F() для обращения к значению текущего столбца.
+– запросы с использованием класса F() для обращения к значению текущего столбца.
 
 ```python
 from django.db.models import F
@@ -418,10 +419,10 @@ class ReporterUpdateView(UpdateAPIView):
     serializer_class = ReporterSerializer
     
     def patch(self, request, *args, **kwargs):
-		reporter = Reporters.objects.get(name='Tintin')
-		reporter.stories_filed = F('stories_filed') + 1
-		reporter.save()
-		
-		# цепочка запросов
-		# Vacancy.objects.filter(pk__in=request.data).update(likes=F('likes') + 1)
+        reporter = Reporters.objects.get(name='Tintin')
+        reporter.stories_filed = F('stories_filed') + 1
+        reporter.save()
+	    
+        # цепочка запросов
+       # Vacancy.objects.filter(pk__in=request.data).update(likes=F('likes') + 1)
 ```

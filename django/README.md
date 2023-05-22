@@ -1,104 +1,94 @@
 # [Django](https://www.djangoproject.com/)
 
-\- Веб-фреймворк для создания сайтов.\
+– Веб-фреймворк для создания сайтов.\
 В отличии от микрофреймворка Flask, Django нуждается в меньшем количестве ручной настройки приложения и не нуждается в дополнительных пакетах для работы с ORM.
 
 <img src="images/django.jpeg" alt="logo django" title="Logo django" style="height: 240px;" />
 
 Django построен по принципу **MVC**, но именуется **MTV**:
-* Model - отображение данных в ООП формат $\rightarrow$ **Model**
-* View - визуальная составляющая $\rightarrow$ **Template**
-* Controller - бизнес-логика приложения $\rightarrow$ **View**
+* Model – отображение данных в ООП формат $\rightarrow$ **Model**
+* View – визуальная составляющая $\rightarrow$ **Template**
+* Controller – бизнес-логика приложения $\rightarrow$ **View**
 
 Приложение разделено на app-ы, python-пакеты, оформленные специальным образом, являющиеся небольшими отдельными web-приложениями.\
-Файл `manage.py` - консольная утилита, с помощью которой создаются папки и файлы, генерируется шаблонный код, накатываются миграции, запускается приложение.
+Файл `manage.py` - консольная утилита, с помощью которой создаются папки и файлы, генерируется шаблонный код, накатываются миграции и запускается приложение.
 
 
-## poetry
+### poetry
 
-\- своременный пакетный менеджер, не такой "примитивный" как pip.
+– своременный пакетный менеджер, не такой "примитивный" как pip, например, позволяет управлять уровнями зависимостей.
 
-```bash
-pip install poetry  :: установить
-poetry init  :: создание pyproject.toml
-
-poetry install  :: установить все зависимости
-```
-
-```bash
-poetry add django  :: pip install django
+```sh
+pip install poetry  # установить
+poetry init  # создание pyproject.toml
+poetry add django  # pip install django
+poetry add django@^3  # ==3.*
+poetry install  # установить все зависимости
 ```
 
 
 ### Виртуальное окружение `virtualenvwrapper`
 
-```bash
-python -m pip install virtualenvwrapper
-:: python -m pip install virtualenv
+– это надстройка над `virtualenv` (инструмент для создания изолированных виртуальных окружений Python, которые позволяют изолировать зависимости проекта), которая предоставляет дополнительные функции, такие как автоматическое переключение между виртуальными окружениями.
 
-python -V  :: узанть версию
-which python  :: узнать расположение интерпертатора
+```sh
+python -m pip install virtualenvwrapper
+
+python -V  # узанть версию
+which python  # узнать расположение интерпертатора
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh
+source /usr/local/bin/virtualenvwrapper.sh  # добавить нижеуказанные команды
 ```
 
-```bash
-mkvirtualenv <name_project>
-
-mkdir <name_project>
-cd <name_project>
-:: создать poetry
-
-:: python -m venv env 
-:: source ./env/bin/activate
+```sh
+mkvirtualenv myenv  # python -m venv myenv
+workon myenv  # source myenv/bin/activate
 deactivate
+
+lsvirtualenv  # показать доступные окружения
+cpvirtualenv myenv myenv_copy
+rmvirtualenv myenv
+
+mkproject myproject   # создать вместе с проектом
+cdproject  # перейти в папку с проектом и активировать окружение
 ```
 
 
 ## Создать Django-приложение
 
-```bash
-django-admin startproject <name_project> .
-./manage.py startapp <name_app>  :: создать отдельный функционал
-./manage.py runserver  :: запустить сервер
+```sh
+django-admin startproject <project> .
+./manage.py startapp <app>  # создать отдельный функционал
+./manage.py runserver  # запустить сервер
 ```
 
 подключение модуля приложения:
 ```python
-# <name_project>/settings.py
+# <project>/settings.py
 
 INSTALLED_APPS = [
     ...
-    '<name_app>',
+    '<app>',
 ]
 
-MEDIA_URL = '/media/'  # путь, по которому будут доступны файлы
-MEDIA_ROOT = BASE_DIR.joinpath('media')  # адрес, по которму хранятся файлы
+MEDIA_URL = '/media/'  # адрес, по которому будут доступны файлы
+MEDIA_ROOT = BASE_DIR.joinpath('media')  # путь, по которму хранятся файлы
 ```
 
 Настройка интепретатора:
-<img src="images/pycharm.png" alt="pycharm" title="pycharm" style="height: 380px;" />
+<img src="images/pycharm.png" alt="pycharm" title="pycharm" style="height: 320px;" />
 
 
 ## Создать модель
 
-Модель - это класс, который описывает поля (столбцы) таблицы DB.
+Модель – это класс, который описывает поля (столбцы) таблицы DB.\
+Пример использование models.QuerySet as manager в [sensive-blog](https://github.com/DaniilIT/sensive-blog)
 
 ```python
-# name_app/models.py
+# <app>/models.py
 from django.contrib.auth.models import User
 from django.db import models
-
-class Skill(models.Model):
-    name = models.CharField(max_length=20)
-    
-    # определение служебной информации о модели
-    class Meta:
-        verbose_name = 'Навык'  # название модели
-        verbose_name_plural = 'Навыки'
-        ordering = ['-name']  # сортировка, но привязывается ко всем запросам
-    
 
 class M(models.Model):
     # STATUS = [
@@ -111,45 +101,57 @@ class M(models.Model):
         OPEN = 'open', 'Открыта'
         CLOSED = 'closed', 'Закрыта'
     
-    # blank=True
     # id = models.BigAutoField(primary_key=True)
-    slug = models.SlugField(max_length=50)
-    description = models.TextField(null=True, blank=True)
+    slug = models.SlugField(max_length=50, unique=True)
+    description = models.TextField('описание', null=True, blank=True)
     # status = models.CharField(max_length=6, choices=STATUS, default='draft')
     status = models.CharField(max_length=6, choices=Status.choices, default=Status.DRAFT)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    image = models.ImageField(upload_to='logos/')  # MEDIA_ROOT + путь до сохранения
+    image = models.ImageField(upload_to='logos/')  # прибавляется к MEDIA_ROOT
     time_create = models.DateTimeField(default=timezone.now)
     created = models.DateField(auto_now_add=True)  # default=datatime.date.now
     is_activated = models.BooleanField(default=False)
     
     # связь O2M (User - One)  # on_delete - что делать при удалении записи, на которую ссылается FK
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # создаст user_id
-    category = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,  # CASCADE  # создаст user_id
+        verbose_name='Автор',
+        limit_choices_to={'is_staff': True},
+        null=True,
+        blank=True
+    )
     # связь M2M
-    skills = models.ManyToManyField(Skill)
+    skills = models.ManyToManyField(
+        Skill,
+        related_name='return_to_m',
+        verbose_name='Навыки'
+    )
+    
+    # определение информации о модели для панели админки
+    class Meta:
+        verbose_name = 'Навык'  # название модели
+        verbose_plural = 'Навыки'
+        ordering = ['-name']  # сортировка, но выполняется ко всем запросам
     
     def __str__(self):
         return self.slug
 ```
 
-null=True - заменять пустые значения на NULL в DB\
-unique=True - проверять на уникальность значений\
-blank=True - разпешить пустые значения в формах, по-умолчанию обязателен\
+null=True – заменять пустые значения на NULL в DB\
+blank=True – разпешить пустые значения в админке, по-умолчанию обязателен\
 
-<img src="images/fields.png" alt="fields" title="Fields" style="height: 570px;" />
+<img src="images/fields.png" alt="fields" title="Fields" style="height: 580px;" />
 
 
 ### **Миграции** 
 
-\- фиксируют текущее состояние DB.\
-\- помогают быстро развернуть DB с нуля.
+– фиксируют текущее состояние DB и помогают быстро развернуть DB с нуля.
 
-
-```bash
+```sh
 ./manage.py makemigrations
-./manage.py migrate  :: накатить
-./manage.py migrate app_name migration_num|zero  # откатить
+./manage.py migrate  # накатить
+./manage.py migrate <app> migration_num | zero  # откатить
 # после отката необходимо удалить файлы из migrations/
 
 ./manage.py loaddata ./data/file.json  # загрузить данные
@@ -161,7 +163,7 @@ blank=True - разпешить пустые значения в формах, �
 соеденить адреса с views
 
 ```python
-# name_project/urls.py
+# project/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from app_name import views
@@ -171,10 +173,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('items/', views.index),
     path('', views.index),
-    path('items/', views.ItemView.as_view()),  # expect callable, который принимает первым аргументом request
+    path('items/', views.ItemView.as_view()),  # expect callable
     path('items/<int:item_id>', views.get),
     path('user/<int:pk>/', views.UserDetailView.as_view()),  # pk or slug
-    path('app_name/', include('app_name.urls'))  # подключить список
+    path('<app>/', include('<app>.urls'))  # подключить список
 ]
 
 if settings.DEBUG:  # доступ к файлам
@@ -182,11 +184,11 @@ if settings.DEBUG:  # доступ к файлам
 ```
 
 Допустимые параметры:
-- `str` — любая непустая строка.
-- `int` — 0 или любое положительное число.
-- `slug` — строка из ASCII букв или чисел, а также дефисы и подчеркивание.
-- `uuid` — универсальный уникальный идентификатор.
-- `path` — непустая строка, включая /.
+- `str` – любая непустая строка.
+- `int` – 0 или любое положительное число.
+- `slug` – строка из ASCII букв или чисел, а также дефисы и подчеркивание.
+- `uuid` – универсальный уникальный идентификатор.
+- `path` – непустая строка, включая /.
 
 
 ## Создать view
@@ -201,14 +203,15 @@ def hello(request):
     return HttpResponse('Hello world')
 ```
 
-### вытащить path-параметры
+
+### вытащить URL-параметры
 
 ```python
 def get(request, item_id):
     if request.method == 'GET':
         try:
             item = M.objects.get(pk=item_id)
-        except Vacancy.DoesNotExist as exc:
+        except M.DoesNotExist as exc:
             return JsonResponse({'error': str(exc)}, status=404)
         
         return JsonResponse({'id': item_id, 'field': item.field},
@@ -242,7 +245,7 @@ def index(request):
 
 ### CSRF
 
-\- вектор атаки, межсайтовой подделки запросов, при котором вредоностный сайт делает запрос как-будто он уже авторизован.
+– вектор атаки, межсайтовой подделки запросов, при котором вредоностный сайт делает запрос как-будто он уже авторизован.
 
 В django отключить проверку csrf-токена можно через декторатор:
 ```python
@@ -264,7 +267,7 @@ def index(request):
 
 ## class-based view
 
-\- подход к написанию вьюшек через классы.
+– подход к написанию вьюшек через классы.
 
 ```python
 import json
@@ -405,42 +408,49 @@ class MDeleteView(DeleteView):
 
 ## Панель Админки
 
-\- UI над DB и позволяет гибко настраивать доступ
+– UI над DB и позволяет гибко настраивать доступ
 
 ```python
-# name_app/admin.py
+# app/admin.py
 from django.contrib import admin
 from items.models import M
 
 # admin.site.register(M)
 
+class TagPostInline(admin.TabularInline):
+    model = Tag.posts.through
+    raw_id_fields = ('tag',)
+
 @admin.register(M)
 class MAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'role')
     search_fields = ('username',)
+    
+    fields = (...)
+    exclude = ('field',)
     list_filter = ('role',)
+    readonly_fields = ('published_at',)
+    raw_id_fields = ('likes',)
+    
+    inlines = [
+        TagPostInline,
+    ]
+    
+    def preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" style="max-height: 200px;">')
+        return 'Файл не выбран'
 ```
+
 
 ### создать супер пользователя
 
-```bash
+```sh
 ./manage.py createsuperuser
 ```
 
 
 ## Postgres
-
-Запустить контейнер:
-```bash
-docker run -p 5432:5432 --name <app_name>_postgres -e POSTGRES_PASSWORD=postgres -d postgres:14.5-alpine
-dacker ps  # посмотреть запущенные контейнеры
-```
-
-**psycopg2** - модуль для работы с postgres
-```bash
-poetry add psycopg2  # если не сработает, то:
-poetry add psycopg2-binary
-```
 
 подключение:
 ```python
@@ -458,12 +468,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-```
-
-```shell
-psql -U user_name -d db_name -h 127.0.0.1
-\q  # выйти
-\dt  # отобразить таблицы
 ```
 
 
@@ -512,7 +516,7 @@ from django.db.models import Count, Avg, Max
 self.object_list = self.object_list.annotate(total_items=Count('item'))
 ```
 
-query set - это запрос, произойдет который только при попытке вытащить данные
+query set – это запрос, произойдет который только при попытке вытащить данные
 
 #### Aggregate:
 
@@ -527,8 +531,8 @@ max_price = Book.objects.all().aggregate(Max('price'))  # {'price__max': result}
 
 ### Join
 
-`select_related` - обратиться к колонке связной таблицы (нужна, т. к. по умолчанию django JOIN не делает)\
-`prefetch_related` - для M2M заранее запрашивает данные из связной таблицы
+`select_related` – обратиться к колонке связной таблицы (нужна, т. к. по умолчанию django JOIN не делает)\
+`prefetch_related` – для M2M заранее запрашивает данные из связной таблицы
 
 ```python
 self.object_list = self.object_list.select_related('user')  # Left Join работает для Foreing Key
@@ -561,5 +565,3 @@ class MListView(ListView):
         
         return JsonResponse(response, safe=False)
 ```
-
-

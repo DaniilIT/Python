@@ -428,7 +428,7 @@ ADD col4 INTEGER
 ### удаление таблицы
 
 &#10158; **TRUNCATE TABLE tname** – удаление всех данных таблицы\
-&#10158; **DROP TABLE tname** – удаление таблицы
+&#10158; **DROP TABLE tname {CASCADE}** – удаление таблицы
 
 
 ***
