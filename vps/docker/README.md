@@ -303,7 +303,7 @@ services:  # описание контейнеров
  
 Основные команды:
 ```sh
-docker-compose up -d # запустить всё приложение в режиме демона
+docker-compose up -d # запустить всё приложение в режиме демона (можно указать один сервис)
 docker-compose up --build  # запустить всё с пересборкой из Dockerfile
 docker-compose start # запустить контейнеры
 docker-compose stop  # остановить контейнер
@@ -312,6 +312,8 @@ docker-compose build  # cобрать образы
 docker-compose pull  # скачать необходимые образы
 docker-compose logs  -f # посмотреть логи сервисов в режиме реального времени
 docker-compose exec -it <service> /bin/bash  # войти внутрь контейнера
+docker-compose exec frontend /bin/sh  # войти внутрь контейнера nginx
+docker-compose config  # подставить переменные из .env
 ```
 
 ### порядок запуска Docker Compose
@@ -354,12 +356,10 @@ services:
     command: flask db upgrade  # переобределение CMD из Dockerfile
   postgres:
     image: postgres:latest
-    environment:
-      POSTGRES_USER: flask_app
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: flask_app
+    env_file:
+      - ./.env
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./pg_data:/var/lib/postgresql/data
     healthcheck:  # секция, которая определяет когда контейнер корректно запущен и готов к работе
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s

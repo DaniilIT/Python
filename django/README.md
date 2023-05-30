@@ -19,10 +19,11 @@ Django построен по принципу **MVC**, но именуется *
 – своременный пакетный менеджер, не такой "примитивный" как pip, например, позволяет управлять уровнями зависимостей.
 
 ```sh
-pip install poetry  # установить
+pip install {--upgrade} poetry  # установить
 poetry init  # создание pyproject.toml
 poetry add django  # pip install django
 poetry add django@^3  # ==3.*
+poetry add pre-commit --dev
 poetry install  # установить все зависимости
 ```
 
@@ -215,7 +216,7 @@ def get(request, item_id):
             return JsonResponse({'error': str(exc)}, status=404)
         
         return JsonResponse({'id': item_id, 'field': item.field},
-                                            json_dumps_params={"ensure_ascii": False})  # Кодировка
+                                            json_dumps_params={'indent': 2, 'ensure_ascii': False})  # кодировка
 ```
 
 

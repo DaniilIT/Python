@@ -42,7 +42,7 @@ mysql+mysqlconnector://root:***@localhost/dbname
 mssql+pyodbc://root:***@localhost/dbname  # работает с разными DB
 ```
 
-Для psycopg2 необходимо `brew install postgresql`,  `apt update && apt install libpq-dev` или `poetry add psycopg2-binary`
+Для psycopg2 необходимо `brew install postgresql`,  `apt update && apt install build-essential libpq-dev` или `poetry add psycopg2-binary`
 
 
 ### [Типы данных](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#mapped-column-derives-the-datatype-and-nullability-from-the-mapped-annotation)

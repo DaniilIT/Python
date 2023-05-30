@@ -26,5 +26,8 @@ ENV/
 # Logs
 *.log
 
+# Poetry
+poetry.lock
+
 # Project
 media/

@@ -325,7 +325,7 @@ user_dict = user_schema.loads(s)
 user = User(**user_dict)
 ```
 
-### Dataclass
+### [Dataclass](https://skyengpublic.notion.site/24-2-d74cb76282624e4d8d4288f4a5940903)
 
 – описание структур данных
 
@@ -344,6 +344,7 @@ Person(first_name='Daniil', age='27')
 ```
 
 ```python
+from dataclasses import dataclass, field
 import marshmallow
 import marshmallow_dataclass
 
@@ -402,4 +403,5 @@ my_table:
 – интегрированная среда разработки - редактор с подсветвой кода, запуском, автодополнением, проверкой ошибок и еще сотней функций.
 
 `ctrl + shift + R` - запуск\
-`alt + cmd + L` - авто PEP8
+`alt + cmd + L` - авто PEP8\
+`shift + cmd + U` - инвертировать регист

@@ -149,56 +149,10 @@ def greeting(name: Optional[str]) -> str:
    return 'Hello ' + name
 ```
 
-`Any` — любой тип\
-`Union[int, float]` - или `int | float`\
-`Optional[str]` - или None\
-`dict[str, int]` - словарь, где ключи будут иметь тип str, а значения - тип int\
-`iterable[int]` - переменные, созданные генераторами или итераторами\
-`Literal['A'] | Literal['B']` –выбор из значений
-
-
-## [dataclass](https://skyengpublic.notion.site/24-2-d74cb76282624e4d8d4288f4a5940903)
-
-```python
-from dataclasses import dataclass, field
-
-@dataclass
-class Person:
-    first_name: str
-    last_name: str
-    age: int = 18
-    children: list = field(default_factory=list)
-```
-
-```python
-from dataclasses import dataclass
-import marshmallow
-import marshmallow_dataclass
-
-@dataclass
-class Person:
-    name: str
-    age: int
-
-    class Meta:
-        unknown = marshmallow.EXCLUDE
-
-PersonSchema = marshmallow_dataclass.class_schema(Person)
-PersonSchema().load({"name": "alex", "age": "100", "ds": 123})  # Person(name='alex', age=100)
-```
-
-```python
-from dataclasses import dataclass, field
-
-import marshmallow_dataclass
-
-@dataclass
-class Person:
-    first_name: str = field(metadata={"data_key": "firstName"})
-    last_name: str = field(metadata={"data_key": "lastName"})
-    age: int = 10
-
-PersonSchema = marshmallow_dataclass.class_schema(Person)
-PersonSchema().load({"firstName": "", "lastName": "", "age": 0})
-# Person(first_name='', last_name='', age=0)
-```
+`Any` – любой тип\
+`Union[int, float]` – или `int | float`\
+`Optional[str]` – или None\
+`Type[A]` – экземпляр класса A или дочернего от него\
+`dict[str, int]` – словарь, где ключи будут иметь тип str, а значения - тип int\
+`iterable[int]` – переменные, созданные генераторами или итераторами\
+`Literal['A'] | Literal['B']` – выбор из значений

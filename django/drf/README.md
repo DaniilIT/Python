@@ -155,7 +155,7 @@ class MSerializer(serializers.ModelSerializer):
 ```
 
 
-### SlugRelatedField
+### RelatedField
 
 ```python
 class SkillsSerializer(serializers.ModelSerializer):
@@ -171,6 +171,9 @@ class MListSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,  # менять нельзя
         slug_field='name'  # по значению поля
+    )
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=GoalCategory.objects.filter(is_deleted=False)
     )
 
     class Meta:
@@ -392,6 +395,8 @@ Lookup для связей:
 from django.db.models import Q
 
     def get(self, request, *args, **kwargs):
+        # self.request.user.goals.filter(~Q(status=self.model.Status.archived))
+        
         # skills = request.GET.getlist('skill')
         # self.queryset = self.queryset.filter(
         #     skills__name__icontains=skills  # без учета регистра

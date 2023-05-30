@@ -52,17 +52,21 @@ logout  # exit  # выйти из VM
 sudo su
 adduser <user>  # задать пароль
 usermod -aG sudo <user>  # дать права администратора
+id <user>  # посмотреть в каких группах состоит
 # vim /etc/ssh/sshd_config
 # PasswordAuthentication no -> PasswordAuthentication yes
-service ssh restart
+systemctl reload sshd  # service ssh restart
 
 ssh -i ~/.ssh/<ssh> <login>@IP4  # войти с указанием ключа
 sudo su - <user>  # поменять пользователя
 ```
 
-посмотреть запущенные процессы:
 ```sh
+# посмотреть запущенные процессы
 ps aux
+
+# посмотреть версию ОС
+lsb_release -a
 ```
 
 попсмотреть кто обслуживает доменное имя:
@@ -123,7 +127,10 @@ sudo su postgres
 createuser --interactive -P  # username, password, n, n, n  # права
 createdb username --owner db_name 
 psql -U username -h 127.0.0.1 db_name
+psql -U username -d db_name -h 127.0.0.1
 \l  # посмотреть доступные DB
+\d  # посмотреть доступные таблицы
+\q  # выход
 ```
 
 
