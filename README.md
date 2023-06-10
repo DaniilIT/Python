@@ -75,6 +75,7 @@ print(s.ljust(8, '-'))  # 'ab-abA--'
 print(s.capitalize())  # Ab-aba
 print(s.upper())  # AB-ABA
 print(s.lower())  # ab-aba
+print(s.casefold()=='aA')  # безрегистровое сравнение
 
 print(s.count('a'))  # 2
 print(s.find('a'))  # 0  # возможно -1  # rfind - с конца
