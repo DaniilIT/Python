@@ -6,6 +6,11 @@ git rebase -i HEAD~n
 git push -f
 ```
 
+Настроить ssh для git
+```sh
+git config --add --local core.sshCommand 'ssh -i ~/.ssh/gitlab'
+```
+
 Запуск github workflows по тэгу:
 ```sh
  git add .

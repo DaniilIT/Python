@@ -23,15 +23,16 @@ class Account:
     def __init__(self, balance):
         self.__balance = balance
 
+    def _storage(self):
+        print('hided')
+
     def get_balance(self):
         return self.__balance
 
     def set_balance(self, balance):
         self._storage()  # underscore (защищенные)
         self.__balance = balance  #  dunder (private)
-        
-    def _storage(self):
-        print('hided')
+
         
 account = Account(0)
 account.set_balance(100)  # hided
@@ -302,6 +303,8 @@ my_iter = iter(Iter(4))
 print(next(my_iter))
 # [x for x in Iter(4)]
 ```
+
+Ключевое отличие между итерируемыми объектами и итераторами заключается в том, что итераторы имеют внутреннее состояние (итерации), запоминающее текущую позицию в последовательности.
 
 Генератор - типичный способ создания итератора.
 

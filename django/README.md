@@ -151,6 +151,7 @@ blank=True – разпешить пустые значения в админк�
 
 ```sh
 ./manage.py makemigrations
+./manage.py makemigrations <app> --empty -n create_new_objects  # пустая
 ./manage.py migrate  # накатить
 ./manage.py migrate <app> migration_num | zero  # откатить
 # после отката необходимо удалить файлы из migrations/

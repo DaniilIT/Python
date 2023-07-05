@@ -22,6 +22,7 @@ timeobj = dt.time(8,48,45)  # 08:48:45
 
 dt_point = dt.datetime.strptime('2023-04-26 08:48:45', '%Y-%m-%d %H:%M:%S')
 print(dt_now.strftime('%m/%d/%y %H:%M:%S'))  # 04/26/23 12:13:14
+print(dt_now.isoformat())  # 2023-06-14T19:03:01.906393
 print(dt_now.timestamp())  # 1682500394.136089  # эпоха с 1970 UTC
 dt_now = dt.datetime.fromtimestamp(1682500394)
 ```
@@ -94,6 +95,12 @@ print(f'Program time: {time.monotonic() - start:.3f}' + " seconds.")
 
 ```sh
 time main.py
+```
+
+```python
+from timeit import timeit
+
+print(timeit(func, number=1000))
 ```
 
 
