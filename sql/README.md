@@ -64,7 +64,8 @@ import sqlite3
 con = sqlite3.connect('dbname.db')  # подключение к файлу DB
 cursor = con.cursor()  # объект для получения данных из DB
 
-query = "<ТЕКСТ ЗАПРОСА>"
+query = "CREATE TABLE user(id int auto_increment primary key)"
+# query = "INSERT INTO user(username) VALUES('%s')"%(name)
 cursor.execute(query)  # выполнение запроса
 cur.executescript(queries)  # выполнение нескольких запросов, разделенных ';'
 
@@ -97,8 +98,9 @@ with sqlite3.connect('dbname.db') as con:
     # получить список названий столбцов
     column_headings = [heading[0] for heading in cursor.description]
     
+    # cur.fetchone
     for row in cur.fetchall():
-        print(row)
+        print(row[1])
 ```
 
 выбрать определенные столбцы:
