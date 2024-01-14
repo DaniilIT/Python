@@ -13,73 +13,80 @@
 ## Переменные
 
 **Переменная** - это название для зарезервированного места в памяти компьютера.\
-Все в python является объектом. \
-**объект** - экземпляр класса, который имеет атрибуты и методы. \
+Всё в python является объектом. \
+**Объект** - это экземпляр класса, который имеет атрибуты и методы. \
 **Структура данных** - это метод организации набора данных, оптимизированный под конкретную задачу.
 
-Объекты делятся на неизменяемые (immutable) и изменяемые (mutable), еще есть **None**. 
+Объекты делятся на неизменяемые (*immutable*) и изменяемые (*mutable*). 
 Неизменяемый тип данных означает, что изменение значения приведет к созданию нового объекта.
 
 
 ## Неизменяемые объекты
 
-1) ### Числовые
+1) ### NoneType
+
+> `None` указывает на отсутствие значения
+
+2) ### Числовые
 
 - #### int (целые числа)
 
 ```python
-a = 5
-print(type(a))  # <class 'int'>
-print(hex(id(a)))  # место хранения в памяти (его использует оператор is)
+num = 5
+print(type(num))  # <class 'int'>
+print(hex(id(num)))  # место хранения в памяти (его использует оператор is)
+int('0x2A', base=16)  # 42  # bin(42) => '0b101010'
 print(int.__doc__)  # посмотреть документацию
 dir(int)  # посмотреть атрибуты и методы
-```
-
-- #### complex (комплексные числа)
-
-```python
-x = 52 + 4j
-print(x.real, x.imag)  # 52.0 4.0
 ```
 
 - #### float (числа с плавающей запятой)
 
 ```python
-number = 3.14
-number.is_integer()  # False
+pi = 3.14
+pi.is_integer()  # False
 
 from math import ceil, floor, trunc
-round(number, 2)  # округление до ближайшего или четного
-int(number) или trunc(number)  # округление в сторону 0
-ceil(number) и floor(number)  # округление вправо и влево
+round(pi, 2)  # округление до ближайшего или четного
+ceil(pi), floor(pi)  # округление вправо и влево соответственно
+int(pi), trunc(pi)  # округление в сторону 0
 ```
 
-2) ### bool (логические значения)
+- #### complex (комплексные числа)
 
 ```python
-# False / True  # 0.0
-print(bool.__bases__)  # (<class 'int'>,)
+x = 3 + 4j
+print(x.real, x.imag)  # 3.0 4.0
 ```
 
-3) ### str (строки)
+3) ### bool (логические значения)
 
-> последовательность символов в кодировке Unicode
+> `True` и `False`
+
+```python
+print(bool.__bases__)  # (<class 'int'>,)
+res_0 = True and ' ' and [''] and 0 and 1  # 0 - первое ложное или последнее
+res_1 = False or None or '' or [] or 1 or 0  # 1 - первое истинное или последнее
+```
+
+4) ### str (строки)
+
+> Последовательность символов в кодировке *Unicode*
 
 ```python
 s = '-'.join('ab.abA '.strip().split('.'))
-# s = "ab-abA"
+# s = 'ab-abA'
 print(s.partition('-'))  # ('ab', '-', 'abA')  # три части
 print(s.startswith('ab'))  # True
 
 print(s.ljust(8, '-'))  # 'ab-abA--'
-print(s.capitalize())  # Ab-aba
-print(s.upper())  # AB-ABA
-print(s.lower())  # ab-aba
-print(s.casefold()=='aA')  # безрегистровое сравнение
+print(s.capitalize(), s.title())  # Ab-aba Ab-Aba
+print(s.upper(), s.lower())  # AB-ABA ab-aba
+print(s.casefold()=='ab-aba')  # True - безрегистровое сравнение
 
 print(s.count('a'))  # 2
 print(s.find('a'))  # 0  # возможно -1  # rfind - с конца
-print(s.index('a'))  # 0  # возможно ValueError
+print(s.index('a'))  # 0  # возможно ValueError  # rindex - с конца
 print(s.replace('a', 'c'))  # cb-cbA
 ```
 
@@ -89,36 +96,33 @@ print(s.replace('a', 'c'))  # cb-cbA
 cherries_name = print('🍒'.encode('ascii', 'namereplace'))  # b'\\N{CHERRIES}'
 print('\N{CHERRIES}')  # '🍒'
 
-print(f'{ord("♥"):016b}')  # 0010011001100101
+print(f'0b{ord("♥"):016b}')  # 0b0010011001100101
 heart_unicode = hex(ord('♥'))  # 0x2665
 heart_symbol = chr(0x2665)  # '♥'
 
-with open('text.txt', 'w', encoding='utf-16', errors='ignore') as f:  # ascii, cp1251
+with open('text.txt', 'w', encoding='utf-16') as f:  # ascii, cp1251
     f.write(heart_symbol)
 ```
 
 #### Форматирование строк
 
 ```python
-name = 'Daniil'
-number = 3.14159
-code = 42
+name, number, code = 'Daniil', 3.14159, 42
 
 # оператор %
-print('%s: %05.2f: 0x%x' % (name, number, code))  # 'Daniil: 03.14: 0x2a'
+print('%-8s|%05.2f|0x%x' % (name, number, code))  # 'Daniil  |03.14|0x2a'
 
 # метод format
-print('{name:8s}: {number:05.2f}: {code:#x}'.format(name=name, number=number, code=code))
-print('{:8s}: {:05.2f}: {:#x}'.format(name, number, code))
-print('{2:8s}\: {0:05.2f}: {1:#x}'.format(number, code, name))
+print('{name:8s}|{number:05.2f}|{code:#x}'.format(name=name, number=number, code=code))
+print('{:8s}|{:05.2f}|{:#x}'.format(name, number, code))
+print('{2:8s}|{1:05.2f}|{0:#x}'.format(code, number, name))
 
 # f-строки
-print(f'{name:8s}: {number:05.2f}: {code:#x}')
+print(f'{name:<8s}|{number:05.2f}|{code:#x}')
 
 # шаблоны (нет доступа к произвольным переменным)
 from string import Template
-
-t = Template('${name}: ${number}: ${code}')
+t = Template('${name}|${number}|${code}')
 print(t.substitute(name=name, number=number, code=code))
 ```
 
@@ -129,7 +133,7 @@ b = b'text'  # ascii
 b = b'\x01\x02\x03\x04'
 ```
 
-4) ### tuple (кортежи)
+5) ### tuple (кортежи)
 
 > неизменяемые списки
 
@@ -151,7 +155,9 @@ nt = Person('Daniil', 26)
 nt.name == nt[0]
 ```
 
-- #### frozenset (неизменяемые множества)
+6) ### frozenset
+
+> неизменяемые множества
 
 ```python
 fs = frozenset({1, 'Daniil'})
@@ -171,22 +177,18 @@ hash(fs)  # TypeError
 ```python
 l = [1, 2, 'Daniil']
 l.append(3)  # добавление в конец
-l.extend([4, 5])
+l.extend([4, 5])  # добавление нескольких элементов
 l.insert(2, 'el')  # вставка
 print(l.pop())  # удаление с конца, возможно IndexError
 l.remove('Daniil')  # возможно ValueError
 
 l.sort(reverse=True)  # на месте
-# Отсортировать список, в котором есть и числа, и значения, через функцию
+# Отсортировать список, в котором есть и числа и строки, через функцию
 l = sorted(l, key = lambda x: (isinstance(x, str), x))
 
 for idx, value in enumerate(l):
     print(idx, value)
 ```
-
-```python
-# Отсортировать список, в котором есть и числа, и значения.
-l = sorted(l, key = lambda x: (isinstance(x, str), x))
 
 > **List Comprehensions** - способ создать список на основе последовательности.
 
@@ -236,6 +238,7 @@ a = bytearray([12, 8, 25])
 s = {1, 2, 3}
 s.add(4)
 s.update((5, 6))
+s.remove(5)  # возможно KeyError
 s.discard(6)  # удалит, если есть
 ```
 ```python
@@ -258,15 +261,15 @@ print(a.issuperset(b))  # True
 > подобная хэш-таблице структура - неупорядоченный набор пар ключ / значение (ключи — уникальные хэшируемые объекты)
 
 ```python
-A = {'name': 'Daniil', 'age': 26}
-A['height']  # KeyError
-A.get('height', 176)
+d = {'name': 'Daniil', 'age': 26}
+d['height']  # KeyError
+d.get('height', 176)
 
-A.update({'s': 'sa'})
-del A['s']  # возможно KeyError
-print(A.pop('s'))  # 'sa'  # возможно KeyError
+d.update([('weight', 70)])
+del d['weight']  # возможно KeyError
+print(d.pop('weight'))  # 70  # возможно KeyError
 
-for key, value in A.items():  # keys() + values()
+for key, value in d.items():  # keys(), values()
     print(key, value)
 ```
 
@@ -275,8 +278,8 @@ for key, value in A.items():  # keys() + values()
 ```python
 from collections import OrderedDict
 
-A = OrderedDict({'name': 'Daniil', 'age': 26})
-print(A.popitem(last=True))  # ('age', 26)
+od = OrderedDict({'name': 'Daniil', 'age': 26})
+print(od.popitem(last=True))  # ('age', 26)
 ```
 
 - #### ChainMap (объединенный словарь)
