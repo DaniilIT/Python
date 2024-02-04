@@ -146,3 +146,11 @@ git push origin v1.0  # выгрузить тэг
 git submodule add <url>
 git submodule update --remote
 ```
+
+Запуск pre-commit:
+```
+poetry add pre-commit
+pre-commit install
+pre-commit sample-config > .pre-commit-config.yaml
+pre-commit run -a 
+```

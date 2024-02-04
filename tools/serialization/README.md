@@ -150,3 +150,10 @@ my_table:
 | 4  |   D   |  True |
 +----+-------+-------+
 ```
+
+Кодирование:
+```
+poetry add ansible-vault-win
+ansible-vault encrypt deploy/.env --output deploy/vault.env
+ansible-vault decrypt deploy/vault.env
+```

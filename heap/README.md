@@ -1,26 +1,5 @@
 # Куча
 
-Кодирование:
-```
-poetry add ansible-vault-win --dev 
-ansible-vault encrypt deploy/.env --output deploy/vault.env
-ansible-vault decrypt deploy/vault.env
-```
-
-Удалить файл из истории git:
-```shell
-git filter-branch -f --index-filter 'git rm --cached --ignore-unmatch ./src/.env'
-git filter-repo --path ./src/.env --invert-paths  # современный способ
-```
-
-Запус pre-commit:
-```
-poetry add pre-commit --dev
-pre-commit install
-pre-commit sample-config > .pre-commit-config.yaml
-pre-commit run -a 
-```
-
 Сгенерировать пароль:
 ```shell
 openssl rand -hex 16
