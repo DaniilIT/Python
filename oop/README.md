@@ -276,6 +276,25 @@ ins = Cls('A', 18)
 isinstance(ins, Cls)  # True
 ```
 
+### with
+
+– менеджер контекста
+
+включает в себя dunder методы: __enter__ и __exit__, заменяет try, except и **close()** в finally.
+
+```python
+with open(file_path, 'w') as file:
+    file.write(text)
+    
+# 'a' -  дописать в конец
+# 'b' -  бинарный режим
+
+with open(file_path, 'r') as file:
+    # line = file.readline()
+    for line in file:
+        print(line.rstrip())
+```
+
 ---
 
 Итерируемые объекты (iterable) — это любые объекты, предоставляющий возможность поочередно перебрать элементы, которые будут вычисляться по мере необходимости.\

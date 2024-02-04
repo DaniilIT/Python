@@ -1,25 +1,5 @@
 # Куча
 
-Объединение коммитов:
-```sh
-git rebase -i HEAD~n
-git push -f
-```
-
-Настроить ssh для git
-```sh
-git config --add --local core.sshCommand 'ssh -i ~/.ssh/gitlab'
-```
-
-Запуск github workflows по тэгу:
-```sh
- git add .
- git commit -m "message"
- git push
- git tag v0.1 -f 
- git push origin v0.1 -ff  
-```
-
 Кодирование:
 ```
 poetry add ansible-vault-win --dev 
@@ -46,21 +26,6 @@ pre-commit run -a
 openssl rand -hex 16
 ```
 
-посмотерть расположение файлов:
-```sh
-git status -u 
-```
-
-удалить переменную из окружения:
-```sh
-unset POSTGRES_DB
-```
-
-выгрузить переменные в окружение:
-```sh
-set -a; source example.env; set +a;
-```
-
 Подставить переменные из .env:
 ```sh
 docker-compose config
@@ -74,11 +39,6 @@ docker-compose config
 снести docker-compose:
 ```sh
 docker-compose down --rmi local -v
-```
-
-Создать новую ветку:
-```sh
-git switch -c <branch>
 ```
 
 Подключиться к postgres
