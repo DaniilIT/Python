@@ -17,7 +17,7 @@
 
 ## Установка
 
-```sh
+```shell
 pip install fastapi[all]
 ```
 
@@ -65,7 +65,7 @@ async def hello():
 
 ### Запуск
 
-```sh
+```shell
 uvicorn main:app --reload  # перезагружать сервер при изменении контекста
 gunicorn main:app -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 -w 2
 ```
@@ -270,11 +270,11 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
 
 ## Alembic
 
-```sh
+```shell
 pip install sqlalchemy alembic pcycorg2 asyncpg aiosqlite
 ```
 
-```sh
+```shell
 alembic init migrations
 # создастся `alembic.ini`
 # sqlalchemi.url = postgresql+asyncpg://%(DB_USER)s:%(DB_PASS)s@%(DB_HOST)s:%(DB_PORT)s/%(DB_NAME)s?async_fallback=True  # DSN 
@@ -366,7 +366,7 @@ await session.commit()
 (FastAPI-users)
 (FastAPI-admin)
 
-```sh
+```shell
 pip install 'fastapi-users[sqlalchemy]'
 ```
 
@@ -411,7 +411,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 ## Redis
 
-```sh
+```shell
 fastapi-cache2[redis]
 ```
 

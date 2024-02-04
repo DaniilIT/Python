@@ -6,7 +6,7 @@
 
 `ctrl + alt + T` *(linux)* – hot key для запуска терминала
 
-```sh
+```shell
 sudo apt update && sudo apt upgrade  # apt-get – явное управления пакетами
 pip install --upgrade pip
 ```
@@ -29,7 +29,7 @@ pip install --upgrade pip
 
 **tree** – показать иерархию файлов
 
-```sh
+```shell
 chmod a+x <file>  # изменить permissions: сделать файл исполняемым для всех
 chmod 644 <file>  # 600 для private ключа и 755 для каталога
 ```
@@ -52,7 +52,7 @@ chmod 644 <file>  # 600 для private ключа и 755 для каталога
 
 **>** – записать в файл\
 **>>** – не перезаписать, а добавить
-```sh
+```shell
 echo 'Hi' > file.txt
 ```
 
@@ -65,7 +65,7 @@ echo 'Hi' > file.txt
 `q` – *quit* выход из режима просмотра\
 
 **grep** – поиск *(**findstr** для windows)*
-```sh
+```shell
 grep -i word file.txt  # поиск по файлу с игнорированием регистра
 cat file.txt | grep word -n  # поиск по файлу и вывести номера строк
 ```
@@ -78,7 +78,7 @@ cat file.txt | grep word -n  # поиск по файлу и вывести но
 **:wq** выйти с сохранением
 
 Переменные окружения:
-```sh
+```shell
 export EDITOR=vim
 echo $EDITOR
 unset EDITOR
@@ -221,7 +221,7 @@ print(args.page)
 
 **Переменные окружения** – это набор пар ключ-значение для пользовательской среды.
 
-```sh
+```shell
 pip install python-dotenv
 ```
 

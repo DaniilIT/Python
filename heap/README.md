@@ -8,7 +8,7 @@ ansible-vault decrypt deploy/vault.env
 ```
 
 Удалить файл из истории git:
-```sh
+```shell
 git filter-branch -f --index-filter 'git rm --cached --ignore-unmatch ./src/.env'
 git filter-repo --path ./src/.env --invert-paths  # современный способ
 ```
@@ -22,27 +22,27 @@ pre-commit run -a
 ```
 
 Сгенерировать пароль:
-```sh
+```shell
 openssl rand -hex 16
 ```
 
 Подставить переменные из .env:
-```sh
+```shell
 docker-compose config
 ```
 
 Сгенерировать статику в django:
-```sh
+```shell
 ./manage.py collectstatic -c --no-input
 ```
 
 снести docker-compose:
-```sh
+```shell
 docker-compose down --rmi local -v
 ```
 
 Подключиться к postgres
-```sh
+```shell
 psql -U postgres -d postgres -h 127.0.0.1
 ```
 

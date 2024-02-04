@@ -37,7 +37,7 @@
 
 Сделать запрос в терминале ([curl](https://losst.pro/kak-polzovatsya-curl), [netcat](https://losst.pro/komanda-nc-v-linux)):
 
-```sh
+```shell
 curl -i -X POST -H 'Content-Type: application/json' -d '{"name": "New item", "year": "2009"}' <url>
 curl --help all
 

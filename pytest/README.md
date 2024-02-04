@@ -55,14 +55,14 @@ assert 2 + 2 == 4, 'count is wrong'
 # (if False) AssertionError: count is wrong
 ```
 
-```sh
+```shell
 OPTIMIZE - отключает проверку условий assert
 python -O main.py
 ```
 
 ***
 
-```sh
+```shell
 python -m pip install pytest
 ```
 
@@ -88,7 +88,7 @@ def test_my_function_3():
 
 Запуск:
 
-```sh
+```shell
 pytest
 # или (можно без tests/__init__.py)
 python -m pytest

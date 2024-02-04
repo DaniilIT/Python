@@ -208,7 +208,7 @@ task.cancel()  # отменить задачу
 
 ### aiohttp
 
-```sh
+```shell
 python -m pip install aiohttp
 ```
 
@@ -354,7 +354,7 @@ with ProcessPoolExecutor() as pool:
 
 ### Работа с файлами
 
-```sh
+```shell
 python -m pip install aiofiles
 ```
 
