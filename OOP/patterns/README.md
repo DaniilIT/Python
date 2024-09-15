@@ -107,54 +107,57 @@ class Factory:
 
 [Подбор](https://regex101.com/)
 
+`[abc]` - `(a|b|c)` | `[^abc]` - ни a, ни b, ни c\
+`[6-9]` - `(6|7|8|9)`\
+`a{2}` - aa | `a{1,3}` - или a, или aa, или aaa\
+`a?` - `a{,1}` (квантификатор)\
+`a*` - `a{0,}` | `a+` - `a{1,}`\
+`.` - любой символ (за исключением `\n`)\
+`\s` - любой пробельный символ | `\S` - любой НЕ пробельный символ\
+`\d` - `[0-9]` | `\D` - `[^0-9]`\
+`[a-zA-Zа-яёА-ЯЁ]` - любая буква\
+`\w` - `[0-9a-zA-Z_]` | `\W` - `[^0-9a-zA-Z_]`
+
+### Шаблоны позиции
+`^` - начало текста; `$` - конец текста\
+`\b` - начало/конец слова; `\B` - не начало/конец слова\
+`A(?=B)` - A перед B; `A(?!B)` - A не перед B\
+`(?<=A)B` - B после A; `(?<!A)B` - B не после A
+
 ```python
 import re
 
-re.split('a', 'bbabbbab')  # ['bb', 'bbb', 'b']
+re.split(r'a', 'bbababbb')  # ['bb', 'b', 'bbb']
+re.split(r'\s*([+\-*/])\s*', '2 + 5*1.3')  # ['2', '+', '5', '*', '1.3']
 
-string = '12da32fd4fw'
-strings = ['12', '12a', 'a12']
-pattern = r'\d{2}'
+re.sub(r'\d\d\.\d\d\.\d{4}', 'DD.MM.YYYY', '05.04.1242 и 08.09.1380')  # 'DD.MM.YYYY и DD.MM.YYYY'
+re.sub(r'(\d\d)\.(\d\d)\.(\d{4})', r'\2.\1.\3', '05.04.1242 и 08.09.1380')  # '04.05.1242 и 09.08.1380'
+re.sub(r'\b[х]\w*', lambda match: f'~{match[0]}~', 'а ты хорош!')  # 'а ты ~хорош~!'
+re.sub(r'\b(\w+)\b\W\1', '\\1', 'привет привет программист-программист')  # привет программист \\ так как не r''
 
-print(re.findall(pattern, string))  # ['12', '32']
-result = re.search(pattern, string)  # <re.Match object; span=(0, 2), match='12'> 
+re.findall(r'\d{2}', '12ab34cd5f')  # ['12', '34']
+regexp : re.Pattern = re.compile(r'([a-z]+)(\d+)')
+regexp.findall('ab12, cd34')  # [('ab', '12'), ('cd', '34')]
 
 # найти все пересекающиеся вхождения
 pattern = re.compile('(?=(abab))')  # positive lookahead 
 for match in re.finditer(pattern, 'abababab'):
     print(match.start())  # 0, 2, 4
 
-regex: re.Pattern = re.compile(pattern)
+phone = 'Телефон +7 (000) 111 22 33'
+match: re.Match = re.search(r'(\d\d)\D(\d\d)', phone)
+print(match[0], ':', match[1], ':', match[2])  # not iterable  # 11 22 : 11 : 22
+print(' : '.join(phone[match.start(i):match.end(i)] for i in range(3)))  # 11 22 : 11 : 22
+
+strings = ['12', '12a', 'a12']
+regex = re.compile(r'\d{2}')
 # search - любое совпадение
-result = list(filter(lambda row: regex.search(row), strings))  # ['12', '12a', 'a12']
+results = list(filter(lambda row: regex.search(row), strings))  # ['12', '12a', 'a12']
 # match - совпадение в начале строки
-result = list(filter(lambda row: regex.match(row), strings))  # ['12', '12a']
+results = list(filter(lambda row: regex.match(row), strings))  # ['12', '12a']
 # fullmatch - полное строки
-result = list(filter(lambda row: regex.fullmatch(row), strings))  # ['12']
+results = list(filter(lambda row: regex.fullmatch(row), strings))  # ['12']
 ```
-
-`[abc]` - `(a|b|c)`\
-`[^abc]` - `(^a|^b|^c)`\
-`[6-9]` - `(6|7|8|9)`\
-`[a-z]` - любая строчная буква\
-`[a-zA-Z]` - любая буква\
-`a{2}` - aa\
-`a{1,3}` - или a, или aa, или aaa\
-`a?` - `a{,1}` (квантификатор)\
-`a+` - `a{1,}`\
-`a*` - `a{0,}`\
-`.` - любой символ\
-`\s` - любой пробельный символ\
-`\S` - любой НЕ пробельный символ\
-`\d` - `[0-9]`\
-`\D` - `[^0-9]`\
-`\w` - `[0-9a-zA-Z_]`\
-`\W` - `[^0-9a-zA-Z_]`
-
-### Шаблоны позиции
-`^` - начало текста; `$` - конец текста\
-`\b` - начало / конец слова; `\B` - не начало / конец слова\
-`(?=A)B` - B после A; `(?!A)B` - B не после A; `A(?<=B)` - A до B; `A(?<!B)` - A не до B
 
 
 ## typing
